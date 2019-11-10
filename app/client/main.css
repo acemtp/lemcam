@@ -104,6 +104,7 @@ body {
   border-radius: 4px;
   text-decoration: none;
   transition: all 200ms ease-in-out 0s;
+  display: inline-block;
 }
 
 .btn:hover {
@@ -117,4 +118,24 @@ body {
 
 .btn.active:hover {
   background-color: #88C0D0;
+}
+
+/* test */
+
+.video-small {
+  width: 256px;
+}
+
+.js-timeline {
+  width: 768px;
+}
+
+.js-correction-left,
+.js-correction-front,
+.js-correction-right {
+  width: 252px;
+}
+
+.js-video-test {
+  display: block;
 }

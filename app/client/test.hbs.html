@@ -1,0 +1,35 @@
+<template name="test">
+  <input class="js-timeline" type="range" min="0" max={{sequence.duration}} value={{Session "currentTime"}} step="0.0001"> <span class="js-video-date"></span> • <span class="js-video-offset"></span>
+  <br>
+
+  <div style="display: flex">
+    <div style="">
+      {{#each sequence.leftVideoIds}}
+        {{#with video}}
+          <video class="js-video-test video-small" src="{{url name}}" data-video-id={{_id}} data-position="left" controls></video>
+        {{/with}}
+      {{/each}}
+    </div>
+    <div style="">
+      {{#each sequence.frontVideoIds}}
+        {{#with video}}
+            <video class="js-video-test video-small" src="{{url name}}" data-video-id={{_id}} data-position="front" controls></video>
+          {{/with}}
+      {{/each}}
+    </div>
+    <div style="">
+      {{#each sequence.rightVideoIds}}
+        {{#with video}}
+            <video class="js-video-test video-small" src="{{url name}}" data-video-id={{_id}} data-position="right" controls></video>
+          {{/with}}
+      {{/each}}
+    </div>
+    <div style="">
+      {{#each sequence.backVideoIds}}
+        {{#with video}}
+            <video class="js-video-test video-small" src="{{url name}}" data-video-id={{_id}} data-position="back" controls></video>
+          {{/with}}
+      {{/each}}
+    </div>
+  </div>  
+</template>

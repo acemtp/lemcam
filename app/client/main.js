@@ -2,7 +2,7 @@ Session.setDefault('selectedMinuteId', undefined);
 Session.setDefault('currentTime', 0.0);
 Session.setDefault('play', false);
 
-let speed = 1;
+playbackRate = 1;
 
 let canPlayCount = -1;
 
@@ -18,42 +18,22 @@ Tracker.autorun(() => {
 
   _.each(['front', 'left', 'right', 'back'], position => {
     const video = $(`.js-video[data-position="${position}"]`)[0];
-    video.src = videos[minute[position]] ? URL.createObjectURL(videos[minute[position]]) : '';
-    video.playbackRate = speed;
+    if (!video) return;
+    video.src = files[minute[position]] ? URL.createObjectURL(files[minute[position]]) : '';
+    video.playbackRate = playbackRate;
   });
-
-  Session.set('currentTime', 0);
 });
-
-let currentTimeHandler;
-
-Tracker.autorun(() => {
-  const play = Session.get('play');
-  _.each($('.js-video'), $video => (play && $video.currentTime < $video.duration ? $video.play() : $video.pause()));
-
-  if (play) {
-    currentTimeHandler = Meteor.setInterval(() => {
-      Session.set('currentTime', $('.js-video[data-position="left"]')[0].currentTime);
-    }, 100);
-
-    endCount = 0;
-    _.each($('.js-video'), $video => { if ($video.currentTime >= $video.duration) endCount++; });
-  } else {
-    if (currentTimeHandler) Meteor.clearInterval(currentTimeHandler);
-    currentTimeHandler = undefined;
-    endCount = -1;
-  }
-});
-
 
 Template.viewer.events({
   'click .js-play-toggle'() { Session.set('play', !Session.get('play')); return false; },
   'click .js-play-speed'(e) {
-    speed = +e.target.dataset.speed;
-    _.each($('.js-video'), $video => $video.playbackRate = speed);
+    playbackRate = +e.target.dataset.speed;
+
+    const $videosAll = $(`.js-video-test`);
+    _.each($videosAll, $video => $video.playbackRate = playbackRate);
 
     $('.js-play-speed').removeClass('active');
-    $(`.js-play-speed[data-speed="${speed}"]`).addClass('active');
+    $(`.js-play-speed[data-speed="${playbackRate}"]`).addClass('active');
 
     return false;
   },
@@ -84,7 +64,7 @@ Template.viewer.events({
       _.each($('.js-video'), $video => (play && $video.currentTime < $video.duration ? $video.play() : $video.pause()));
     } else canPlayCount++;
   },
-  'change .js-select'(e) {
+  async 'change .js-select'(e) {
     // files = _.filter(e.target.files, f => f.type.indexOf('video') === 0);
     // $('.js-video')[0].src = 'https://file-examples.com/wp-content/uploads/2017/04/file_example_MP4_480_1_5MG.mp4';
     // $('.js-video')[0].src = URL.createObjectURL(files[0]);
@@ -98,29 +78,66 @@ Template.viewer.events({
       if (splitted.length < 6) return;
       const position = splitted[5].replace('_repeater', '').replace('.mp4', ''); // front right left back
 
-      if (!videos[file.name]) videos[file.name] = file;
+      if (!files[file.name]) files[file.name] = file;
 
       const minute = Minutes.findOne({ createdAt: date.toDate() });
       if (minute) Minutes.update(minute._id, { $set: { [position]: file.name } });
       else Minutes.insert({ _id: Minutes.id(), createdAt: date.toDate(), [position]: file.name });
     });
 
-    Minutes.find({}, { sort: { createdAt: 1 } }).forEach(minute => {
+    await Promise.all(_.map(files, async file => {
+      for (let pos = 0, i = 0; i < 10 && pos < file.size; i++) {
+        let s = (new DataView(await file.slice(pos, pos + 4).arrayBuffer())).getUint32();
+        const t = (await (await file.slice(pos + 4, pos + 8)).text());
+        // console.log({ pos, t, s });
+        if (t === 'moov') s = 8;
+        if (t === 'mvhd') {
+          if (Videos.findOne({ name: file.name })) return;
+
+          const video = {
+            _id: Videos.id(),
+            name: file.name,
+          };
+
+          const splitted = file.name.split('-');
+          if (splitted.length < 6) return;
+          video.position = splitted[5].replace('_repeater', '').replace('.mp4', ''); // front right left back
+
+          let d;
+          d = (new DataView(await file.slice(pos + (3 * 4) , pos + (3 * 4) + 4).arrayBuffer())).getUint32();
+          video.startedAt = moment(d * 1000 - 2082844800000).toDate();
+
+          d = (new DataView(await file.slice(pos + (4 * 4) , pos + (4 * 4) + 4).arrayBuffer())).getUint32();
+          video.endedAt = moment(d * 1000 - 2082844800000).toDate();
+
+          video.timeScale = (new DataView(await file.slice(pos + (5 * 4) , pos + (5 * 4) + 4).arrayBuffer())).getUint32();
+          video.duration = (new DataView(await file.slice(pos + (6 * 4) , pos + (6 * 4) + 4).arrayBuffer())).getUint32() / video.timeScale;
+
+          Videos.insert(video);
+          return;
+        }
+        pos += s;
+      }
+    }));
+
+    Videos.find({}, { sort: { startedAt: 1 } }).forEach(video => {
       const newestSequence = Sequences.findOne({}, { sort: { startedAt: -1 } });
-      if (!newestSequence || minute.createdAt - newestSequence.endedAt > 90 * 1000) {
+      if (!newestSequence || video.startedAt - newestSequence.endedAt > 90 * 1000) {
         Sequences.insert({
           _id: Sequences.id(),
-          startedAt: minute.createdAt,
-          endedAt: moment(minute.createdAt).add(60, 'seconds').toDate(),
-          minuteIds: [minute._id],
+          startedAt: video.startedAt,
+          endedAt: video.endedAt,
+          duration: (video.endedAt - video.startedAt) / 1000,
+          [`${video.position}VideoIds`]: [video._id],
         });
       } else {
-        Sequences.update(newestSequence._id, {
-          $set: { endedAt: moment(minute.createdAt).add(60, 'seconds').toDate() },
-          $push: { minuteIds: minute._id },
-        });
+        const modifier = { $push: { [`${video.position}VideoIds`]: video._id } };
+        if (video.endedAt > newestSequence.endedAt) modifier.$set = { endedAt: video.endedAt, duration: (video.endedAt - newestSequence.startedAt) / 1000 };
+        Sequences.update(newestSequence._id, modifier);
       }
     });
+
+    videoSetOffset(0);
 
     const minute = Minutes.findOne({}, { sort: { createdAt: -1 } });
     if (minute) Session.set('selectedMinuteId', minute._id);
