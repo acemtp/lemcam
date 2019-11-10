@@ -30,7 +30,23 @@ videoSetOffset = offset => {
 
   _.each(['front', 'left', 'right', 'back'], position => {
     const video = Videos.findOne({ position, startedAt: { $lte: date }, endedAt: { $gte: date } });
-    if (!video) return;
+    if (!video) {
+      const nextVideo = Videos.findOne({ position, startedAt: { $gte: date } }, { sort: { startedAt: 1 } });
+      if (!nextVideo) {
+        log(Sequences.findOne());
+        return;
+      }
+      log('no video for now, display the next one', { nextVideo, ct: (date - nextVideo.startedAt) / 1000 });
+
+      const $videos = $(`.js-video-test[data-video-id="${nextVideo._id}"]`);
+      if (!$videos.length) return;
+      $videos[0].playbackRate = playbackRate;
+      $videos[0].currentTime = 0;
+      if (Session.get('play')) Meteor.setTimeout(() => { $videos[0].play(); }, nextVideo.startedAt - date);
+      $videos.show();
+
+      return;
+    }
 
     l({video, d: (date - video.startedAt) / 1000});
 
@@ -116,7 +132,11 @@ Template.viewer.events({
     const $nextVideos = $(`.js-video-test[data-video-id="${nextVideoId}"]`);
     if (!$nextVideos.length) return;
     $nextVideos[0].playbackRate = playbackRate;
-    // $nextVideos[0].currentTime = (currentDate - nextVideo.startedAt) / 1000;
+
+// XXX faire que ca deporte le play a plus tard si la video est trop en avance
+
+    $nextVideos[0].currentTime = (currentDate - nextVideo.startedAt) / 1000;
+    if (Session.get('play')) Meteor.setTimeout(() => { $videos[0].play(); }, nextVideo.startedAt - date);
     $nextVideos[0].play();
     $nextVideos.show();
   },

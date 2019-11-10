@@ -137,7 +137,9 @@ Template.viewer.events({
       }
     });
 
-    videoSetOffset(0);
+    Meteor.setTimeout(() => {
+      videoSetOffset(0);
+    }, 500);
 
     const minute = Minutes.findOne({}, { sort: { createdAt: -1 } });
     if (minute) Session.set('selectedMinuteId', minute._id);
