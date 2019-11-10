@@ -1,0 +1,17 @@
+{
+  "public": {
+    "lp": {
+      "projectName": "lemcam",
+      "admins": [],
+      "production": true,
+      "staging": false,
+      "enableLogClient": false,
+      "enableApm": false
+    },
+    "analyticsSettings": {
+      "Google Analytics": { "trackingId": "UA-", "sendUserId": true },
+      "Facebook Pixel": { "pixelId": "" }
+    },
+    "maintenance": false
+  }
+}
