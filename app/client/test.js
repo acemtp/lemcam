@@ -92,7 +92,7 @@ Tracker.autorun(() => {
     if (currentTimeHandler) Meteor.clearInterval(currentTimeHandler);
     currentTimeHandler = undefined;
 
-    videoSetOffset(playOffset);
+    videoSetOffset(currentOffset);
 
     // endCount = -1;
   }
