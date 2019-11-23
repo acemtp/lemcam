@@ -5,33 +5,9 @@
   <br>
 
   <div style="display: flex">
-    <div style="">
-      {{#each sequence.leftVideoIds}}
-        {{#with video}}
-          <video class="js-video-test video-small" src="{{url name}}" data-video-id={{_id}} data-position="left" controls></video>
-        {{/with}}
-      {{/each}}
-    </div>
-    <div style="">
-      {{#each sequence.frontVideoIds}}
-        {{#with video}}
-            <video class="js-video-test video-small" src="{{url name}}" data-video-id={{_id}} data-position="front" controls></video>
-          {{/with}}
-      {{/each}}
-    </div>
-    <div style="">
-      {{#each sequence.rightVideoIds}}
-        {{#with video}}
-            <video class="js-video-test video-small" src="{{url name}}" data-video-id={{_id}} data-position="right" controls></video>
-          {{/with}}
-      {{/each}}
-    </div>
-    <div style="">
-      {{#each sequence.backVideoIds}}
-        {{#with video}}
-            <video class="js-video-test video-small" src="{{url name}}" data-video-id={{_id}} data-position="back" controls></video>
-          {{/with}}
-      {{/each}}
-    </div>
+    <div style="flex-grow: 1; width: 100%">{{> dbVideo position="front"}}</div>
+    <div style="flex-grow: 1; width: 100%">{{> dbVideo position="left"}}</div>
+    <div style="flex-grow: 1; width: 100%">{{> dbVideo position="right"}}</div>
+    <div style="flex-grow: 1; width: 100%">{{> dbVideo position="back"}}</div>
   </div>  
 </template>

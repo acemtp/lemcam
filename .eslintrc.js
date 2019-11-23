@@ -55,7 +55,6 @@ module.exports = {
 
     // project
     Sequences: true,
-    Minutes: true,
     videos: true,
     endCount: true,
   },

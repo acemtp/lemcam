@@ -1,37 +1,5 @@
 import hotkeys from 'hotkeys-js';
 
-hotkeys('left', event => {
-  event.preventDefault();
-
-  const selectedMinuteId = Session.get('selectedMinuteId');
-  if (!selectedMinuteId) return;
-  const minute = Minutes.findOne(selectedMinuteId);
-  if (!minute) return;
-
-  const nextMinute = Minutes.findOne({ createdAt: { $lt: minute.createdAt } }, { sort: { createdAt: -1 } });
-  if (!nextMinute) return;
-
-  Session.set('selectedMinuteId', nextMinute._id);
-
-  endCount = 0;
-});
-
-hotkeys('right', event => {
-  event.preventDefault();
-
-  const selectedMinuteId = Session.get('selectedMinuteId');
-  if (!selectedMinuteId) return;
-  const minute = Minutes.findOne(selectedMinuteId);
-  if (!minute) return;
-
-  const previousMinute = Minutes.findOne({ createdAt: { $gt: minute.createdAt } }, { sort: { createdAt: 1 } });
-  if (!previousMinute) return;
-
-  Session.set('selectedMinuteId', previousMinute._id);
-
-  endCount = 0;
-});
-
 hotkeys('up', event => {
   event.preventDefault();
 

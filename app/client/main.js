@@ -1,5 +1,4 @@
 Session.setDefault('selectedMinuteId', undefined);
-Session.setDefault('currentTime', 0.0);
 Session.set('play', false);
 
 playbackRate = 1;
@@ -8,21 +7,21 @@ let canPlayCount = -1;
 
 endCount = -1;
 
-Tracker.autorun(() => {
-  const selectedMinuteId = Session.get('selectedMinuteId');
-  if (!selectedMinuteId) return;
-  const minute = Minutes.findOne(selectedMinuteId);
-  if (!minute) return;
+// Tracker.autorun(() => {
+//   const selectedMinuteId = Session.get('selectedMinuteId');
+//   if (!selectedMinuteId) return;
+//   const minute = Minutes.findOne(selectedMinuteId);
+//   if (!minute) return;
 
-  canPlayCount = 0;
+//   canPlayCount = 0;
 
-  _.each(['front', 'left', 'right', 'back'], position => {
-    const video = $(`.js-video[data-position="${position}"]`)[0];
-    if (!video) return;
-    video.src = files[minute[position]] ? URL.createObjectURL(files[minute[position]]) : '';
-    video.playbackRate = playbackRate;
-  });
-});
+//   _.each(['front', 'left', 'right', 'back'], position => {
+//     const video = $(`.js-video[data-position="${position}"]`)[0];
+//     if (!video) return;
+//     video.src = files[minute[position]] ? URL.createObjectURL(files[minute[position]]) : '';
+//     video.playbackRate = playbackRate;
+//   });
+// });
 
 Template.viewer.events({
   'click .js-play-toggle'() { Session.set('play', !Session.get('play')); return false; },
@@ -37,23 +36,23 @@ Template.viewer.events({
 
     return false;
   },
-  'ended .js-video'(e) {
-    l({ m: 'end', t: e.target, endCount, cu: e.target.currentTime, du: e.target.duration });
-    if (endCount === -1) return;
+  // 'ended .js-video'(e) {
+  //   l({ m: 'end', t: e.target, endCount, cu: e.target.currentTime, du: e.target.duration });
+  //   if (endCount === -1) return;
 
-    if (endCount === 2) {
-      const selectedMinuteId = Session.get('selectedMinuteId');
-      if (!selectedMinuteId) return;
-      const minute = Minutes.findOne(selectedMinuteId);
-      if (!minute) return;
+  //   if (endCount === 2) {
+  //     const selectedMinuteId = Session.get('selectedMinuteId');
+  //     if (!selectedMinuteId) return;
+  //     const minute = Minutes.findOne(selectedMinuteId);
+  //     if (!minute) return;
 
-      const nextMinute = Minutes.findOne({ createdAt: { $gt: minute.createdAt } }, { sort: { createdAt: 1 } });
-      if (!nextMinute) return;
-      Session.set('selectedMinuteId', nextMinute._id);
+  //     const nextMinute = Minutes.findOne({ createdAt: { $gt: minute.createdAt } }, { sort: { createdAt: 1 } });
+  //     if (!nextMinute) return;
+  //     Session.set('selectedMinuteId', nextMinute._id);
 
-      endCount = 0;
-    } else endCount++;
-  },
+  //     endCount = 0;
+  //   } else endCount++;
+  // },
   'canplay .js-video'() {
     if (canPlayCount === -1) return;
 
@@ -80,9 +79,9 @@ Template.viewer.events({
 
       if (!files[file.name]) files[file.name] = file;
 
-      const minute = Minutes.findOne({ createdAt: date.toDate() });
-      if (minute) Minutes.update(minute._id, { $set: { [position]: file.name } });
-      else Minutes.insert({ _id: Minutes.id(), createdAt: date.toDate(), [position]: file.name });
+      // const minute = Minutes.findOne({ createdAt: date.toDate() });
+      // if (minute) Minutes.update(minute._id, { $set: { [position]: file.name } });
+      // else Minutes.insert({ _id: Minutes.id(), createdAt: date.toDate(), [position]: file.name });
     });
 
     await Promise.all(_.map(files, async file => {
@@ -145,8 +144,8 @@ Template.viewer.events({
       videoSetOffset(0);
     }, 500);
 
-    const minute = Minutes.findOne({}, { sort: { createdAt: -1 } });
-    if (minute) Session.set('selectedMinuteId', minute._id);
+    // const minute = Minutes.findOne({}, { sort: { createdAt: -1 } });
+    // if (minute) Session.set('selectedMinuteId', minute._id);
 
     // var myPlayer = videojs('my-player');
     // myPlayer.src('https://file-examples.com/wp-content/uploads/2017/04/file_example_MP4_480_1_5MG.mp4');
@@ -156,7 +155,6 @@ Template.viewer.events({
     Session.set('selectedMinuteId', this._id);
   },
   'click .js-minute-select.active'(e) {
-    Session.set('currentTime', e.offsetX);
     Session.set('currentTimeMousePosition', e.offsetX);
     _.each($('.js-video'), $video => $video.currentTime = e.offsetX);
     const play = Session.get('play');
@@ -172,7 +170,6 @@ Template.viewer.events({
     Session.set('currentTimeMousePosition', e.offsetX);
 
     if (e.which || e.buttons) {
-      Session.set('currentTime', e.offsetX);
       _.each($('.js-video'), $video => $video.currentTime = e.offsetX);
       const play = Session.get('play');
       if (play) _.each($('.js-video'), $video => (play && $video.currentTime < $video.duration ? $video.play() : $video.pause()));
@@ -182,18 +179,18 @@ Template.viewer.events({
 
 Template.viewer.helpers({
   sequences() { return Sequences.find({}, { sort: { createdAt: 1 } }); },
-  minute() { return Minutes.findOne(`${this}`); },
-  createdAtAndCurrent() { return moment(this.createdAt).add(Session.get('currentTime'), 'seconds'); },
-  minuteBackground() {
-    const currentTime = Session.get('currentTime');
-    const currentTimePercent = currentTime * 100 / 60;
+  // minute() { return Minutes.findOne(`${this}`); },
+  // createdAtAndCurrent() { return moment(this.createdAt).add(Session.get('currentTime'), 'seconds'); },
+  // minuteBackground() {
+  //   const currentTime = Session.get('currentTime');
+  //   const currentTimePercent = currentTime * 100 / 60;
 
-    const currentTimeMousePosition = Session.get('currentTimeMousePosition');
-    const currentTimeMousePositionPercent = currentTimeMousePosition * 100 / 60;
-    if (currentTimeMousePositionPercent < currentTimePercent) {
-      return `linear-gradient(to right, #BF616A 0%, #BF616A ${currentTimeMousePositionPercent}%, #8FBCBB ${currentTimeMousePositionPercent}%, #8FBCBB ${currentTimePercent}%, #E5E9F0 ${currentTimePercent}%, #E5E9F0 100%)`;
-    } else {
-      return `linear-gradient(to right, #BF616A 0%, #BF616A ${currentTimeMousePositionPercent}%, #E5E9F0 ${currentTimeMousePositionPercent}%, #E5E9F0 100%)`;
-    }
-  },
+  //   const currentTimeMousePosition = Session.get('currentTimeMousePosition');
+  //   const currentTimeMousePositionPercent = currentTimeMousePosition * 100 / 60;
+  //   if (currentTimeMousePositionPercent < currentTimePercent) {
+  //     return `linear-gradient(to right, #BF616A 0%, #BF616A ${currentTimeMousePositionPercent}%, #8FBCBB ${currentTimeMousePositionPercent}%, #8FBCBB ${currentTimePercent}%, #E5E9F0 ${currentTimePercent}%, #E5E9F0 100%)`;
+  //   } else {
+  //     return `linear-gradient(to right, #BF616A 0%, #BF616A ${currentTimeMousePositionPercent}%, #E5E9F0 ${currentTimeMousePositionPercent}%, #E5E9F0 100%)`;
+  //   }
+  // },
 });
