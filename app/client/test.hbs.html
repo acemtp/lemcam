@@ -1,5 +1,7 @@
 <template name="test">
-  <input class="js-timeline" type="range" min="0" max={{sequence.duration}} value={{Session "currentTime"}} step="0.0001"> <span class="js-video-date"></span> • <span class="js-video-offset"></span>
+  {{offsetToDate (Session 'sliderOffset')}} ({{fixed (Session 'sliderOffset') 2}}s)
+  •
+  {{offsetToDate (Session 'mouseOffset')}} ({{fixed (Session 'mouseOffset') 2}}s)
   <br>
 
   <div style="display: flex">

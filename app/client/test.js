@@ -2,18 +2,6 @@
 let playDate;
 let playOffset;
 
-// update the html with this offset
-const displayOffset = offset => {
-  sequence = Sequences.findOne();
-  if (!sequence) return;
-
-  const date = moment(sequence.startedAt).add(offset, 'seconds');
-
-  $('.js-timeline').val(offset);
-  $('.js-video-date').html(date.format('MM-DD-YYYY HH:mm:ss'));
-  $('.js-video-offset').html(Number(offset).toFixed(2));
-};
-
 // force the video to a specific position in the sequence
 // "offset" is between 0s and the duration of the sequence in seconds
 videoSetOffset = offset => {
@@ -29,9 +17,9 @@ videoSetOffset = offset => {
   $(`.js-video-test`).hide();
 
   _.each(['front', 'left', 'right', 'back'], position => {
-    const video = Videos.findOne({ position, startedAt: { $lte: date }, endedAt: { $gte: date } });
+    const video = Clips.findOne({ position, startedAt: { $lte: date }, endedAt: { $gte: date } });
     if (!video) {
-      const nextVideo = Videos.findOne({ position, startedAt: { $gte: date } }, { sort: { startedAt: 1 } });
+      const nextVideo = Clips.findOne({ position, startedAt: { $gte: date } }, { sort: { startedAt: 1 } });
       if (!nextVideo) {
         log(Sequences.findOne());
         return;
@@ -58,10 +46,11 @@ videoSetOffset = offset => {
     $videos.show();
   });
 
-  displayOffset(offset);
+  Session.set('sliderOffset', offset);
+
   if (Session.get('play')) {
     playDate = new Date();
-    playOffset = +$('.js-timeline').val();
+    playOffset = Session.get('sliderOffset');
   }
 };
 
@@ -72,12 +61,14 @@ Tracker.autorun(() => {
   // _.each($('.js-video'), $video => (play && $video.currentTime < $video.duration ? $video.play() : $video.pause()));
 
   if (play) {
+    if (currentTimeHandler) return;
+
     playDate = new Date();
-    playOffset = +$('.js-timeline').val();
+    playOffset = Session.get('sliderOffset');
 
     currentTimeHandler = Meteor.setInterval(() => {
       const offset = playOffset + playbackRate * (new Date() - playDate) / 1000;
-      displayOffset(offset);
+      Session.set('sliderOffset', offset);
     }, 100);
 
     videoSetOffset(playOffset);
@@ -87,7 +78,7 @@ Tracker.autorun(() => {
     if (currentTimeHandler) Meteor.clearInterval(currentTimeHandler);
     currentTimeHandler = undefined;
 
-    playOffset = +$('.js-timeline').val();
+    playOffset = +Session.get('sliderOffset');
     videoSetOffset(playOffset);
 
     // endCount = -1;
@@ -96,20 +87,17 @@ Tracker.autorun(() => {
 
 Template.test.helpers({
   sequence() { return Sequences.findOne(); },
-  video() { return Videos.findOne(`${this}`); },
+  video() { return Clips.findOne(`${this}`); },
   url(name) { return name ? URL.createObjectURL(files[name]) : '' },
-  videoDate() {
-    const offset = Session.get('videoOffset');
-
+  offsetToDate(offset) {
     sequence = Sequences.findOne();
     if (!sequence) return;
-
-    return moment(sequence.startedAt).add(offset, 'seconds').toDate();
+    return moment(sequence.startedAt).add(offset, 'seconds').format('MM-DD-YYYY HH:mm:ss');
   },
+  fixed(offset, decimal) { return Number(offset).toFixed(decimal); }
 });
 
 Template.viewer.events({
-  'change .js-timeline, input .js-timeline'(e) { videoSetOffset(+e.target.value); },
   'ended .js-video-test'(e) {
     l({ m: 'testend', aa: this, t: e.target, d: e.target.dataset, cu: e.target.currentTime, du: e.target.duration });
 
@@ -120,7 +108,7 @@ Template.viewer.events({
     if (nextVideoIndex >= sequence[`${this.position}VideoIds`].length) return;
     const nextVideoId = sequence[`${this.position}VideoIds`][nextVideoIndex];
 
-    // const nextVideo = Videos.findOne(nextVideoId);
+    // const nextVideo = Clips.findOne(nextVideoId);
     // if (!nextVideo) return;
 
     const currentTime = Session.get('currentTime');

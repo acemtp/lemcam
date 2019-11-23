@@ -1,6 +1,6 @@
 Session.setDefault('selectedMinuteId', undefined);
 Session.setDefault('currentTime', 0.0);
-Session.setDefault('play', false);
+Session.set('play', false);
 
 playbackRate = 1;
 
@@ -92,49 +92,53 @@ Template.viewer.events({
         // console.log({ pos, t, s });
         if (t === 'moov') s = 8;
         if (t === 'mvhd') {
-          if (Videos.findOne({ name: file.name })) return;
+          if (Clips.findOne({ name: file.name })) return;
 
-          const video = {
-            _id: Videos.id(),
+          const clip = {
+            _id: Clips.id(),
             name: file.name,
           };
 
           const splitted = file.name.split('-');
           if (splitted.length < 6) return;
-          video.position = splitted[5].replace('_repeater', '').replace('.mp4', ''); // front right left back
+          clip.position = splitted[5].replace('_repeater', '').replace('.mp4', ''); // front right left back
 
           let d;
           d = (new DataView(await file.slice(pos + (3 * 4) , pos + (3 * 4) + 4).arrayBuffer())).getUint32();
-          video.startedAt = moment(d * 1000 - 2082844800000).toDate();
+          clip.startedAt = moment(d * 1000 - 2082844800000).toDate();
 
           d = (new DataView(await file.slice(pos + (4 * 4) , pos + (4 * 4) + 4).arrayBuffer())).getUint32();
-          video.endedAt = moment(d * 1000 - 2082844800000).toDate();
+          clip.endedAt = moment(d * 1000 - 2082844800000).toDate();
 
-          video.timeScale = (new DataView(await file.slice(pos + (5 * 4) , pos + (5 * 4) + 4).arrayBuffer())).getUint32();
-          video.duration = (new DataView(await file.slice(pos + (6 * 4) , pos + (6 * 4) + 4).arrayBuffer())).getUint32() / video.timeScale;
+          clip.timeScale = (new DataView(await file.slice(pos + (5 * 4) , pos + (5 * 4) + 4).arrayBuffer())).getUint32();
+          clip.duration = (new DataView(await file.slice(pos + (6 * 4) , pos + (6 * 4) + 4).arrayBuffer())).getUint32() / clip.timeScale;
 
-          Videos.insert(video);
+          Clips.insert(clip);
           return;
         }
         pos += s;
       }
     }));
 
-    Videos.find({}, { sort: { startedAt: 1 } }).forEach(video => {
+    Clips.find({}, { sort: { startedAt: 1 } }).forEach(clip => {
       const newestSequence = Sequences.findOne({}, { sort: { startedAt: -1 } });
-      if (!newestSequence || video.startedAt - newestSequence.endedAt > 90 * 1000) {
+      let sequenceId;
+      if (!newestSequence || clip.startedAt - newestSequence.endedAt > 90 * 1000) {
+        sequenceId = Sequences.id()
         Sequences.insert({
-          _id: Sequences.id(),
-          startedAt: video.startedAt,
-          endedAt: video.endedAt,
-          duration: (video.endedAt - video.startedAt) / 1000,
-          [`${video.position}VideoIds`]: [video._id],
+          _id: sequenceId,
+          startedAt: clip.startedAt,
+          endedAt: clip.endedAt,
+          duration: (clip.endedAt - clip.startedAt) / 1000,
+          [`${clip.position}VideoIds`]: [clip._id],
         });
       } else {
-        const modifier = { $push: { [`${video.position}VideoIds`]: video._id } };
-        if (video.endedAt > newestSequence.endedAt) modifier.$set = { endedAt: video.endedAt, duration: (video.endedAt - newestSequence.startedAt) / 1000 };
+        sequenceId = newestSequence._id;
+        const modifier = { $push: { [`${clip.position}VideoIds`]: clip._id } };
+        if (clip.endedAt > newestSequence.endedAt) modifier.$set = { endedAt: clip.endedAt, duration: (clip.endedAt - newestSequence.startedAt) / 1000 };
         Sequences.update(newestSequence._id, modifier);
       }
+      Clips.update(clip._id, { $set: { sequenceId } });
     });
 
     Meteor.setTimeout(() => {

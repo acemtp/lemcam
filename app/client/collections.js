@@ -2,8 +2,8 @@
 files = {};
 
 // each entry is one video metadata for one position
-Videos = new Mongo.Collection(null);
-Videos.id = () => `vid_${Random.id()}`;
+Clips = new Mongo.Collection(null);
+Clips.id = () => `clp_${Random.id()}`;
 
 // each entry is one minute of video that contains all position
 Minutes = new Mongo.Collection(null);
