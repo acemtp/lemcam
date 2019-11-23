@@ -2,6 +2,22 @@
 let playDate;
 let playOffset;
 
+// update the html with this offset
+currentOffset = 0;
+const updateOffset = offset => {
+  sequence = Sequences.findOne();
+  if (!sequence) return;
+
+  const date = moment(sequence.startedAt).add(offset, 'seconds');
+
+  $('.js-video-date').html(date.format('MM-DD-YYYY HH:mm:ss'));
+  $('.js-video-offset').html(Number(offset).toFixed(2));
+  
+  $('.line-current').attr('x1', offset).attr('x2', offset)
+
+  currentOffset = offset;
+};
+
 // force the video to a specific position in the sequence
 // "offset" is between 0s and the duration of the sequence in seconds
 videoSetOffset = offset => {
@@ -36,8 +52,6 @@ videoSetOffset = offset => {
       return;
     }
 
-    l({video, d: (date - video.startedAt) / 1000});
-
     const $videos = $(`.js-video-test[data-video-id="${video._id}"]`);
     if (!$videos.length) return;
     $videos[0].playbackRate = playbackRate;
@@ -46,11 +60,11 @@ videoSetOffset = offset => {
     $videos.show();
   });
 
-  Session.set('sliderOffset', offset);
+  updateOffset(offset);
 
   if (Session.get('play')) {
     playDate = new Date();
-    playOffset = Session.get('sliderOffset');
+    playOffset = currentOffset;
   }
 };
 
@@ -64,11 +78,11 @@ Tracker.autorun(() => {
     if (currentTimeHandler) return;
 
     playDate = new Date();
-    playOffset = Session.get('sliderOffset');
+    playOffset = currentOffset;
 
     currentTimeHandler = Meteor.setInterval(() => {
       const offset = playOffset + playbackRate * (new Date() - playDate) / 1000;
-      Session.set('sliderOffset', offset);
+      updateOffset(offset);
     }, 100);
 
     videoSetOffset(playOffset);
@@ -78,7 +92,6 @@ Tracker.autorun(() => {
     if (currentTimeHandler) Meteor.clearInterval(currentTimeHandler);
     currentTimeHandler = undefined;
 
-    playOffset = +Session.get('sliderOffset');
     videoSetOffset(playOffset);
 
     // endCount = -1;
@@ -89,12 +102,6 @@ Template.test.helpers({
   sequence() { return Sequences.findOne(); },
   video() { return Clips.findOne(`${this}`); },
   url(name) { return name ? URL.createObjectURL(files[name]) : '' },
-  offsetToDate(offset) {
-    sequence = Sequences.findOne();
-    if (!sequence) return;
-    return moment(sequence.startedAt).add(offset, 'seconds').format('MM-DD-YYYY HH:mm:ss');
-  },
-  fixed(offset, decimal) { return Number(offset).toFixed(decimal); }
 });
 
 Template.viewer.events({

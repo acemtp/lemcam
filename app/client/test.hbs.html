@@ -1,7 +1,7 @@
 <template name="test">
-  {{offsetToDate (Session 'sliderOffset')}} ({{fixed (Session 'sliderOffset') 2}}s)
+  <span class="js-video-date"></span> (<span class="js-video-offset"></span>s)
   •
-  {{offsetToDate (Session 'mouseOffset')}} ({{fixed (Session 'mouseOffset') 2}}s)
+  <span class="js-mouse-date"></span> (<span class="js-mouse-offset"></span>s)
   <br>
 
   <div style="display: flex">

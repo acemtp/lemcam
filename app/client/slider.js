@@ -1,6 +1,3 @@
-Session.set('sliderOffset', 0);
-Session.set('mouseOffset', 0);
-
 Template.slider.onRendered(function () {
   // if (!Clips.findOne()) {
   //   _.each(_clips, c => {
@@ -32,9 +29,9 @@ Template.slider.onRendered(function () {
 
     const lineCurrent = svg.append('line')
       .attr('class', 'line-current')
-      .attr('x1', Session.get('sliderOffset'))
+      .attr('x1', 10)
       .attr('y1', 0)
-      .attr('x2', Session.get('sliderOffset'))
+      .attr('x2', 10)
       .attr('y2', 60)
 
 
@@ -46,10 +43,10 @@ Template.slider.onRendered(function () {
         const date = moment(sequence.startedAt).add(offset, 'seconds');
         lineMouse.attr('x1', offset).attr('x2', offset)
 
-        Session.set('mouseOffset', offset);
+        $('.js-mouse-date').html(date.format('MM-DD-YYYY HH:mm:ss'));
+        $('.js-mouse-offset').html(Number(offset).toFixed(2));
 
         if (d3.event.buttons) {
-          Session.set('sliderOffset', offset);
           videoSetOffset(offset);
         }
       })
@@ -58,23 +55,8 @@ Template.slider.onRendered(function () {
         const bcr = $('.js-slider')[0].getBoundingClientRect();
         const offset = Math.max(0, d3.event.pageX - bcr.x) / bcr.width * 700;
         const date = moment(sequence.startedAt).add(offset, 'seconds').toDate();
-        Session.set('sliderOffset', offset);
         videoSetOffset(offset);
       })
-
-  // update the visual things
-  this.autorun(() => {
-    sequence = Sequences.findOne();
-    if (!sequence) return;
-    const offset = Session.get('sliderOffset');
-
-    const date = moment(sequence.startedAt).add(offset, 'seconds');
-l({offset,date})
-    // $('.js-video-date').html(date.format('MM-DD-YYYY HH:mm:ss'));
-    // $('.js-video-offset').html(Number(offset).toFixed(2));
-  
-    lineCurrent.attr('x1', offset).attr('x2', offset);
-  });
 
   // const margin = 80;
   this.autorun(() => {
