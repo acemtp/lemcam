@@ -95,8 +95,8 @@ Template.viewer.events({
           d = (new DataView(await file.slice(pos + (4 * 4) , pos + (4 * 4) + 4).arrayBuffer())).getUint32();
           clip.endedAt = moment(d * 1000 - 2082844800000).toDate();
 
-          clip.timeScale = (new DataView(await file.slice(pos + (5 * 4) , pos + (5 * 4) + 4).arrayBuffer())).getUint32();
-          clip.duration = (new DataView(await file.slice(pos + (6 * 4) , pos + (6 * 4) + 4).arrayBuffer())).getUint32() / clip.timeScale;
+          const timeScale = (new DataView(await file.slice(pos + (5 * 4) , pos + (5 * 4) + 4).arrayBuffer())).getUint32();
+          clip.duration = (new DataView(await file.slice(pos + (6 * 4) , pos + (6 * 4) + 4).arrayBuffer())).getUint32() / timeScale;
 
           Clips.insert(clip);
           return;
@@ -135,17 +135,17 @@ Template.viewer.events({
       startedAt: sequence.startedAt,
       endedAt: sequence.endedAt,
       duration: sequence.duration,
-      frontFileId: `fil_${Random.id()}`,
-      leftFileId: `fil_${Random.id()}`,
-      rightFileId: `fil_${Random.id()}`,
-      backFileId: sequence.backClipIds ? `fil_${Random.id()}` : undefined,
+      frontClip: Clips.findOne(sequence.frontClipIds[0]),
+      leftClip: Clips.findOne(sequence.leftClipIds[0]),
+      rightClip: Clips.findOne(sequence.leftClipIds[0]),
+      backClip: sequence.backClipIds ? Clips.findOne(sequence.backClipIds[0]) : undefined,
       uploadInProgressCount,
     });
 
     uploadClip = (videoId, clipId) => {
       const video = Videos.findOne(videoId);
       const clip = Clips.findOne(clipId);
-      const upload = Files.insert({ file: localFiles[clip.name], fileId: `${video[`${clip.position}FileId`]}`, streams: 'dynamic', chunkSize: 'dynamic' }, false);
+      const upload = Files.insert({ file: localFiles[clip.name], fileId: `${video[`${clip.position}Clip`]._id}`, streams: 'dynamic', chunkSize: 'dynamic' }, false);
       upload.on('start', function () { log('file upload start', clipId); });
       upload.on('end', (error, fileObj) => {
         Videos.update(videoId, { $inc: { uploadInProgressCount: -1 } });
@@ -167,9 +167,6 @@ Template.viewer.events({
     Meteor.setTimeout(() => {
       videoSetOffset(0);
     }, 500);
-
-    // const minute = Minutes.findOne({}, { sort: { createdAt: -1 } });
-    // if (minute) Session.set('selectedMinuteId', minute._id);
 
     // var myPlayer = videojs('my-player');
     // myPlayer.src('https://file-examples.com/wp-content/uploads/2017/04/file_example_MP4_480_1_5MG.mp4');
