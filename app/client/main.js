@@ -7,6 +7,44 @@ let canPlayCount = -1;
 
 Meteor.subscribe('videos');
 
+extractMetaData = async sequenceId => {
+  log('extractMetaData', { sequenceId });
+  const sequence = Sequences.findOne(sequenceId);
+  if (!sequence) return;
+
+  const clipIds = _.flatten(sequence.frontClipIds, sequence.leftClipIds, sequence.rightClipIds, sequence.backClipIds);
+
+  const clips = Clips.find({ _id: { $in: clipIds } }, { sort: { startedAt: 1 } }).fetch();
+
+  await Promise.all(_.map(clips, async clip => {
+    if (!clip.fuzzy) return;
+    const file = localFiles[clip.name];
+    for (let pos = 0, i = 0; i < 10 && pos < file.size; i++) {
+      let s = (new DataView(await file.slice(pos, pos + 4).arrayBuffer())).getUint32();
+      const t = (await (await file.slice(pos + 4, pos + 8)).text());
+      // console.log({ pos, t, s });
+      if (t === 'moov') s = 8;
+      if (t === 'mvhd') {
+        let d;
+        d = (new DataView(await file.slice(pos + (3 * 4) , pos + (3 * 4) + 4).arrayBuffer())).getUint32();
+        clip.startedAt = moment(d * 1000 - 2082844800000).toDate();
+
+        d = (new DataView(await file.slice(pos + (4 * 4) , pos + (4 * 4) + 4).arrayBuffer())).getUint32();
+        clip.endedAt = moment(d * 1000 - 2082844800000).toDate();
+
+        const timeScale = (new DataView(await file.slice(pos + (5 * 4) , pos + (5 * 4) + 4).arrayBuffer())).getUint32();
+        clip.duration = (new DataView(await file.slice(pos + (6 * 4) , pos + (6 * 4) + 4).arrayBuffer())).getUint32() / timeScale;
+
+        Clips.update(clip._id, { $set: { startedAt: clip.startedAt, endedAt: clip.endedAt, duration: clip.duration }, $unset: { fuzzy: true } });
+        return;
+      }
+      pos += s;
+    }
+  }));
+
+  Sequences.update(sequence._id, { $set: { startedAt: clips[0].startedAt, endedAt: clips[clips.length - 1].endedAt, duration: (clips[clips.length - 1].endedAt - clips[0].startedAt) / 1000 }, $unset: { fuzzy: true } });
+};
+
 prepareLocalFiles = async files => {
   _.each(files, file => {
     const date = moment(file.name, 'YYYY-MM-DD_HH-mm-ss');
@@ -18,47 +56,28 @@ prepareLocalFiles = async files => {
     const position = splitted[5].replace('_repeater', '').replace('.mp4', ''); // front right left back
 
     if (!localFiles[file.name]) localFiles[file.name] = file;
-
-    // const minute = Minutes.findOne({ createdAt: date.toDate() });
-    // if (minute) Minutes.update(minute._id, { $set: { [position]: file.name } });
-    // else Minutes.insert({ _id: Minutes.id(), createdAt: date.toDate(), [position]: file.name });
   });
 
   log('files insert');
 
   await Promise.all(_.map(localFiles, async file => {
-    for (let pos = 0, i = 0; i < 10 && pos < file.size; i++) {
-      let s = (new DataView(await file.slice(pos, pos + 4).arrayBuffer())).getUint32();
-      const t = (await (await file.slice(pos + 4, pos + 8)).text());
-      // console.log({ pos, t, s });
-      if (t === 'moov') s = 8;
-      if (t === 'mvhd') {
-        if (Clips.findOne({ name: file.name })) return;
+    if (Clips.findOne({ name: file.name })) return;
 
-        const clip = {
-          _id: Clips.id(),
-          name: file.name,
-        };
+    const clip = { _id: Clips.id(), name: file.name };
 
-        const splitted = file.name.split('-');
-        if (splitted.length < 6) return;
-        clip.position = splitted[5].replace('_repeater', '').replace('.mp4', ''); // front right left back
+    const splitted = file.name.split('-');
+    if (splitted.length < 6) return;
+    clip.position = splitted[5].replace('_repeater', '').replace('.mp4', ''); // front right left back
 
-        let d;
-        d = (new DataView(await file.slice(pos + (3 * 4) , pos + (3 * 4) + 4).arrayBuffer())).getUint32();
-        clip.startedAt = moment(d * 1000 - 2082844800000).toDate();
+    clip.startedAt = moment(file.name, 'YYYY-MM-DD_HH-mm-ss').toDate();
 
-        d = (new DataView(await file.slice(pos + (4 * 4) , pos + (4 * 4) + 4).arrayBuffer())).getUint32();
-        clip.endedAt = moment(d * 1000 - 2082844800000).toDate();
+    clip.endedAt = moment(clip.startedAt).add(60, 'seconds').toDate();
 
-        const timeScale = (new DataView(await file.slice(pos + (5 * 4) , pos + (5 * 4) + 4).arrayBuffer())).getUint32();
-        clip.duration = (new DataView(await file.slice(pos + (6 * 4) , pos + (6 * 4) + 4).arrayBuffer())).getUint32() / timeScale;
+    clip.duration = 60;
 
-        Clips.insert(clip);
-        return;
-      }
-      pos += s;
-    }
+    clip.fuzzy = true; // we don't have the exact timing extracted from the video
+
+    Clips.insert(clip);
   }));
 
   Clips.find({}, { sort: { startedAt: 1 } }).forEach(clip => {
@@ -72,6 +91,7 @@ prepareLocalFiles = async files => {
         endedAt: clip.endedAt,
         duration: (clip.endedAt - clip.startedAt) / 1000,
         [`${clip.position}ClipIds`]: [clip._id],
+        fuzzy: true,
       });
     } else {
       sequenceId = newestSequence._id;
@@ -128,98 +148,3 @@ prepareLocalFiles = async files => {
   // myPlayer.src('https://file-examples.com/wp-content/uploads/2017/04/file_example_MP4_480_1_5MG.mp4');
   // myPlayer.src(URL.createObjectURL(localFiles[0]));
 };
-
-Template.viewer.events({
-  'click .js-forward'() { videoSetOffset(currentOffset + 1); },
-  'click .js-backward'() { videoSetOffset(Math.max(0, currentOffset - 1)); },
-  'click .js-fast-forward'() { videoSetOffset(currentOffset + 60); },
-  'click .js-fast-backward'() { videoSetOffset(Math.max(0, currentOffset - 60)); },
-  'click .js-play-toggle'() { Session.set('play', !Session.get('play')); return false; },
-  'click .js-play-speed'(e) {
-    playbackRate = +e.target.dataset.speed;
-
-    const $videosAll = $(`.js-video-test`);
-    _.each($videosAll, $video => $video.playbackRate = playbackRate);
-
-    $('.js-play-speed').removeClass('active');
-    $(`.js-play-speed[data-speed="${playbackRate}"]`).addClass('active');
-
-    return false;
-  },
-  // 'ended .js-video'(e) {
-  //   l({ m: 'end', t: e.target, endCount, cu: e.target.currentTime, du: e.target.duration });
-  //   if (endCount === -1) return;
-
-  //   if (endCount === 2) {
-  //     const selectedMinuteId = Session.get('selectedMinuteId');
-  //     if (!selectedMinuteId) return;
-  //     const minute = Minutes.findOne(selectedMinuteId);
-  //     if (!minute) return;
-
-  //     const nextMinute = Minutes.findOne({ createdAt: { $gt: minute.createdAt } }, { sort: { createdAt: 1 } });
-  //     if (!nextMinute) return;
-  //     Session.set('selectedMinuteId', nextMinute._id);
-
-  //     endCount = 0;
-  //   } else endCount++;
-  // },
-  'canplay .js-video'() {
-    if (canPlayCount === -1) return;
-
-    if (canPlayCount === 2) {
-      canPlayCount = -1;
-
-      const play = Session.get('play');
-      _.each($('.js-video'), $video => (play && $video.currentTime < $video.duration ? $video.play() : $video.pause()));
-    } else canPlayCount++;
-  },
-  async 'change .js-select'(e) {
-    // localFiles = _.filter(e.target.files, f => f.type.indexOf('video') === 0);
-    // $('.js-video')[0].src = 'https://file-examples.com/wp-content/uploads/2017/04/file_example_MP4_480_1_5MG.mp4';
-    // $('.js-video')[0].src = URL.createObjectURL(localFiles[0]);
-
-    prepareLocalFiles(e.target.files)
-  },
-  'click .js-minute-select'() {
-    Session.set('selectedMinuteId', this._id);
-  },
-  'click .js-minute-select.active'(e) {
-    Session.set('currentTimeMousePosition', e.offsetX);
-    _.each($('.js-video'), $video => $video.currentTime = e.offsetX);
-    const play = Session.get('play');
-    if (play) _.each($('.js-video'), $video => (play && $video.currentTime < $video.duration ? $video.play() : $video.pause()));
-  },
-  'mouseenter .js-minute-select.active'(e) {
-    Session.set('currentTimeMousePosition', e.offsetX);
-  },
-  'mouseleave .js-minute-select.active'() {
-    Session.set('currentTimeMousePosition', -1);
-  },
-  'mousemove .js-minute-select.active'(e) {
-    Session.set('currentTimeMousePosition', e.offsetX);
-
-    if (e.which || e.buttons) {
-      _.each($('.js-video'), $video => $video.currentTime = e.offsetX);
-      const play = Session.get('play');
-      if (play) _.each($('.js-video'), $video => (play && $video.currentTime < $video.duration ? $video.play() : $video.pause()));
-    }
-  },
-});
-
-Template.viewer.helpers({
-  sequences() { return Sequences.find({}, { sort: { createdAt: 1 } }); },
-  // minute() { return Minutes.findOne(`${this}`); },
-  // createdAtAndCurrent() { return moment(this.createdAt).add(Session.get('currentTime'), 'seconds'); },
-  // minuteBackground() {
-  //   const currentTime = Session.get('currentTime');
-  //   const currentTimePercent = currentTime * 100 / 60;
-
-  //   const currentTimeMousePosition = Session.get('currentTimeMousePosition');
-  //   const currentTimeMousePositionPercent = currentTimeMousePosition * 100 / 60;
-  //   if (currentTimeMousePositionPercent < currentTimePercent) {
-  //     return `linear-gradient(to right, #BF616A 0%, #BF616A ${currentTimeMousePositionPercent}%, #8FBCBB ${currentTimeMousePositionPercent}%, #8FBCBB ${currentTimePercent}%, #E5E9F0 ${currentTimePercent}%, #E5E9F0 100%)`;
-  //   } else {
-  //     return `linear-gradient(to right, #BF616A 0%, #BF616A ${currentTimeMousePositionPercent}%, #E5E9F0 ${currentTimeMousePositionPercent}%, #E5E9F0 100%)`;
-  //   }
-  // },
-});

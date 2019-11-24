@@ -7,7 +7,11 @@
 
     <div class="label"><b>Local Sequences</b></div>
     {{#each sequences}}
-      <div class="item js-sequence-select {{#if eq (Session 'selectedSequenceId') _id}}active{{/if}}">{{fromNow startedAt}} ({{duration}}s)</div>
+      <div class="item js-sequence-select {{#if eq (Session 'selectedSequenceId') _id}}active{{/if}}">
+        {{#if fuzzy}}~{{/if}}
+        {{formatDate startedAt "YY-MM-DD HH:mm"}}
+        ({{humanizeDuration duration}})
+      </div>
     {{/each}}
   </div>
 </template>

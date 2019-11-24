@@ -1,37 +1,33 @@
 import hotkeys from 'hotkeys-js';
 
-hotkeys('up', event => {
-  event.preventDefault();
-
-  // const selectedMinuteId = Session.get('selectedMinuteId');
-  // if (!selectedMinuteId) return;
-  // const sequence = Sequences.findOne({ minuteIds: selectedMinuteId });
-  // if (!sequence) return;
-
-  // const olderSequence = Sequences.findOne({ startedAt: { $lt: sequence.startedAt } }, { sort: { startedAt: -1 } });
-  // if (!olderSequence) return;
-
-  // Session.set('selectedMinuteId', olderSequence.minuteIds[0]);
-});
-
 hotkeys('down', event => {
   event.preventDefault();
 
-  // const selectedMinuteId = Session.get('selectedMinuteId');
-  // if (!selectedMinuteId) return;
-  // const sequence = Sequences.findOne({ minuteIds: selectedMinuteId });
-  // if (!sequence) return;
+  const sequence = Sequences.findOne(Session.get('selectedSequenceId'));
+  if (!sequence) return;
 
-  // const newerSequence = Sequences.findOne({ startedAt: { $gt: sequence.startedAt } }, { sort: { startedAt: 1 } });
-  // if (!newerSequence) return;
+  const olderSequence = Sequences.findOne({ startedAt: { $lt: sequence.startedAt } }, { sort: { startedAt: -1 } });
+  if (!olderSequence) return;
 
-  // Session.set('selectedMinuteId', newerSequence.minuteIds[0]);
+  Session.set('selectedSequenceId', olderSequence._id);
+});
 
-  // endCount = 0;
+hotkeys('up', event => {
+  event.preventDefault();
+
+  const sequence = Sequences.findOne(Session.get('selectedSequenceId'));
+  if (!sequence) return;
+
+  const newerSequence = Sequences.findOne({ startedAt: { $gt: sequence.startedAt } }, { sort: { startedAt: 1 } });
+  if (!newerSequence) return;
+
+  Session.set('selectedSequenceId', newerSequence._id);
 });
 
 hotkeys('right', event => { event.preventDefault(); $('.js-forward').click(); });
+hotkeys('shift+right', event => { event.preventDefault(); $('.js-fast-forward').click(); });
 hotkeys('left', event => { event.preventDefault(); $('.js-backward').click(); });
+hotkeys('shift+left', event => { event.preventDefault(); $('.js-fast-backward').click(); });
 
 hotkeys('space', event => { event.preventDefault(); $('.js-play-toggle').click(); });
 

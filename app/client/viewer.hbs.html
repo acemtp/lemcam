@@ -1,0 +1,26 @@
+<template name="viewer">
+  <a class="btn js-fast-backward" href="#"><i class="fal fa-fast-backward"></i></a>
+  <a class="btn js-backward" href="#"><i class="fal fa-backward"></i></a>
+  <a class="btn js-play-toggle" href="#">{{#if Session "play"}}<i class="fal fa-pause"></i>{{else}}<i class="fal fa-play"></i>{{/if}}</a>
+  <a class="btn js-forward" href="#"><i class="fal fa-forward"></i></a>
+  <a class="btn js-fast-forward" href="#"><i class="fal fa-fast-forward"></i></a>
+  <a class="btn js-play-speed" data-speed="0.5" href="#">0.5x</a>
+  <a class="btn js-play-speed active" data-speed="1" href="#">1x</a>
+  <a class="btn js-play-speed" data-speed="2" href="#">2x</a>
+  <a class="btn js-play-speed" data-speed="6" href="#">6x</a>
+  <a class="btn js-play-speed" data-speed="10" href="#">10x</a>
+
+  {{> slider}}
+
+  <span class="js-video-date"></span> (<span class="js-video-offset"></span>s)
+  •
+  <span class="js-mouse-date"></span> (<span class="js-mouse-offset"></span>s)
+  <br>
+
+  <div style="display: flex">
+    <div style="flex-grow: 1; width: 100%">{{> dbVideo position="front"}}</div>
+    <div style="flex-grow: 1; width: 100%">{{> dbVideo position="left"}}</div>
+    <div style="flex-grow: 1; width: 100%">{{> dbVideo position="right"}}</div>
+    <div style="flex-grow: 1; width: 100%">{{> dbVideo position="back"}}</div>
+  </div>  
+</template>
