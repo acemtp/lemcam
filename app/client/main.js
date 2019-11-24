@@ -5,23 +5,7 @@ playbackRate = 1;
 
 let canPlayCount = -1;
 
-endCount = -1;
-
-// Tracker.autorun(() => {
-//   const selectedMinuteId = Session.get('selectedMinuteId');
-//   if (!selectedMinuteId) return;
-//   const minute = Minutes.findOne(selectedMinuteId);
-//   if (!minute) return;
-
-//   canPlayCount = 0;
-
-//   _.each(['front', 'left', 'right', 'back'], position => {
-//     const video = $(`.js-video[data-position="${position}"]`)[0];
-//     if (!video) return;
-//     video.src = files[minute[position]] ? URL.createObjectURL(files[minute[position]]) : '';
-//     video.playbackRate = playbackRate;
-//   });
-// });
+Meteor.subscribe('videos');
 
 Template.viewer.events({
   'click .js-play-toggle'() { Session.set('play', !Session.get('play')); return false; },
@@ -64,9 +48,9 @@ Template.viewer.events({
     } else canPlayCount++;
   },
   async 'change .js-select'(e) {
-    // files = _.filter(e.target.files, f => f.type.indexOf('video') === 0);
+    // localFiles = _.filter(e.target.files, f => f.type.indexOf('video') === 0);
     // $('.js-video')[0].src = 'https://file-examples.com/wp-content/uploads/2017/04/file_example_MP4_480_1_5MG.mp4';
-    // $('.js-video')[0].src = URL.createObjectURL(files[0]);
+    // $('.js-video')[0].src = URL.createObjectURL(localFiles[0]);
 
     _.each(e.target.files, file => {
       const date = moment(file.name, 'YYYY-MM-DD_HH-mm-ss');
@@ -77,14 +61,16 @@ Template.viewer.events({
       if (splitted.length < 6) return;
       const position = splitted[5].replace('_repeater', '').replace('.mp4', ''); // front right left back
 
-      if (!files[file.name]) files[file.name] = file;
+      if (!localFiles[file.name]) localFiles[file.name] = file;
 
       // const minute = Minutes.findOne({ createdAt: date.toDate() });
       // if (minute) Minutes.update(minute._id, { $set: { [position]: file.name } });
       // else Minutes.insert({ _id: Minutes.id(), createdAt: date.toDate(), [position]: file.name });
     });
 
-    await Promise.all(_.map(files, async file => {
+    log('files insert');
+
+    await Promise.all(_.map(localFiles, async file => {
       for (let pos = 0, i = 0; i < 10 && pos < file.size; i++) {
         let s = (new DataView(await file.slice(pos, pos + 4).arrayBuffer())).getUint32();
         const t = (await (await file.slice(pos + 4, pos + 8)).text());
@@ -123,22 +109,60 @@ Template.viewer.events({
       const newestSequence = Sequences.findOne({}, { sort: { startedAt: -1 } });
       let sequenceId;
       if (!newestSequence || clip.startedAt - newestSequence.endedAt > 90 * 1000) {
-        sequenceId = Sequences.id()
+        sequenceId = Sequences.id();
         Sequences.insert({
           _id: sequenceId,
           startedAt: clip.startedAt,
           endedAt: clip.endedAt,
           duration: (clip.endedAt - clip.startedAt) / 1000,
-          [`${clip.position}VideoIds`]: [clip._id],
+          [`${clip.position}ClipIds`]: [clip._id],
         });
       } else {
         sequenceId = newestSequence._id;
-        const modifier = { $push: { [`${clip.position}VideoIds`]: clip._id } };
+        const modifier = { $push: { [`${clip.position}ClipIds`]: clip._id } };
         if (clip.endedAt > newestSequence.endedAt) modifier.$set = { endedAt: clip.endedAt, duration: (clip.endedAt - newestSequence.startedAt) / 1000 };
         Sequences.update(newestSequence._id, modifier);
       }
       Clips.update(clip._id, { $set: { sequenceId } });
     });
+
+    const sequence = Sequences.findOne();
+    const uploadInProgressCount = sequence.backClipIds ? 4 : 3;
+
+    videoId = Videos.id();
+    const video = Videos.insert({
+      _id: videoId,
+      startedAt: sequence.startedAt,
+      endedAt: sequence.endedAt,
+      duration: sequence.duration,
+      frontFileId: `fil_${Random.id()}`,
+      leftFileId: `fil_${Random.id()}`,
+      rightFileId: `fil_${Random.id()}`,
+      backFileId: sequence.backClipIds ? `fil_${Random.id()}` : undefined,
+      uploadInProgressCount,
+    });
+
+    uploadClip = (videoId, clipId) => {
+      const video = Videos.findOne(videoId);
+      const clip = Clips.findOne(clipId);
+      const upload = Files.insert({ file: localFiles[clip.name], fileId: `${video[`${clip.position}FileId`]}`, streams: 'dynamic', chunkSize: 'dynamic' }, false);
+      upload.on('start', function () { log('file upload start', clipId); });
+      upload.on('end', (error, fileObj) => {
+        Videos.update(videoId, { $inc: { uploadInProgressCount: -1 } });
+        const video = Videos.findOne(videoId);
+        log('file upload end', { clipId, video });
+        if (video.uploadInProgressCount === 0) {
+          log('file all upload end');
+          Meteor.call('videoCreate', videoId);
+        }
+      });
+      upload.start();
+    };
+
+    uploadClip(videoId, sequence.frontClipIds[0]);
+    uploadClip(videoId, sequence.leftClipIds[0]);
+    uploadClip(videoId, sequence.rightClipIds[0]);
+    if (sequence.backClipIds) uploadClip(videoId, sequence.backClipIds[0]);
 
     Meteor.setTimeout(() => {
       videoSetOffset(0);
@@ -149,7 +173,7 @@ Template.viewer.events({
 
     // var myPlayer = videojs('my-player');
     // myPlayer.src('https://file-examples.com/wp-content/uploads/2017/04/file_example_MP4_480_1_5MG.mp4');
-    // myPlayer.src(URL.createObjectURL(files[0]));
+    // myPlayer.src(URL.createObjectURL(localFiles[0]));
   },
   'click .js-minute-select'() {
     Session.set('selectedMinuteId', this._id);

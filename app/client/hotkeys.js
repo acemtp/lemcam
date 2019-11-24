@@ -3,33 +3,31 @@ import hotkeys from 'hotkeys-js';
 hotkeys('up', event => {
   event.preventDefault();
 
-  const selectedMinuteId = Session.get('selectedMinuteId');
-  if (!selectedMinuteId) return;
-  const sequence = Sequences.findOne({ minuteIds: selectedMinuteId });
-  if (!sequence) return;
+  // const selectedMinuteId = Session.get('selectedMinuteId');
+  // if (!selectedMinuteId) return;
+  // const sequence = Sequences.findOne({ minuteIds: selectedMinuteId });
+  // if (!sequence) return;
 
-  const olderSequence = Sequences.findOne({ startedAt: { $lt: sequence.startedAt } }, { sort: { startedAt: -1 } });
-  if (!olderSequence) return;
+  // const olderSequence = Sequences.findOne({ startedAt: { $lt: sequence.startedAt } }, { sort: { startedAt: -1 } });
+  // if (!olderSequence) return;
 
-  Session.set('selectedMinuteId', olderSequence.minuteIds[0]);
-
-  endCount = 0;
+  // Session.set('selectedMinuteId', olderSequence.minuteIds[0]);
 });
 
 hotkeys('down', event => {
   event.preventDefault();
 
-  const selectedMinuteId = Session.get('selectedMinuteId');
-  if (!selectedMinuteId) return;
-  const sequence = Sequences.findOne({ minuteIds: selectedMinuteId });
-  if (!sequence) return;
+  // const selectedMinuteId = Session.get('selectedMinuteId');
+  // if (!selectedMinuteId) return;
+  // const sequence = Sequences.findOne({ minuteIds: selectedMinuteId });
+  // if (!sequence) return;
 
-  const newerSequence = Sequences.findOne({ startedAt: { $gt: sequence.startedAt } }, { sort: { startedAt: 1 } });
-  if (!newerSequence) return;
+  // const newerSequence = Sequences.findOne({ startedAt: { $gt: sequence.startedAt } }, { sort: { startedAt: 1 } });
+  // if (!newerSequence) return;
 
-  Session.set('selectedMinuteId', newerSequence.minuteIds[0]);
+  // Session.set('selectedMinuteId', newerSequence.minuteIds[0]);
 
-  endCount = 0;
+  // endCount = 0;
 });
 
 hotkeys('right', event => { event.preventDefault(); videoSetOffset(currentOffset + 1); });

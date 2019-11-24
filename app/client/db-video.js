@@ -37,7 +37,7 @@ dbVideoSet = (date, position) => {
   const video = $videos[0];
   if (clip._id !== data.currentClipIds[data.currentBuffer]) {
     log('dbVideoSet load front buffer');
-    video.src = URL.createObjectURL(files[clip.name]);
+    video.src = URL.createObjectURL(localFiles[clip.name]);
     video.playbackRate = playbackRate;
     data.currentClipIds[data.currentBuffer] = clip._id;
     if (Session.get('play')) video.play();
@@ -66,30 +66,13 @@ dbVideoSet = (date, position) => {
     const video = $videos[0];
     if (clip._id !== data.currentClipIds[1 - data.currentBuffer]) {
       log('dbVideoSet load back buffer');
-      video.src = URL.createObjectURL(files[clip.name]);
+      video.src = URL.createObjectURL(localFiles[clip.name]);
       data.currentClipIds[1 - data.currentBuffer] = clip._id;
       video.playbackRate = playbackRate;
       video.currentTime = 0;
       video.pause();
     }
   }
-
-  //   const nextVideo = Clips.findOne({ position, startedAt: { $gt: date } }, { sort: { startedAt: 1 } });
-  //   if (!nextVideo) {
-  //     log(Sequences.findOne());
-  //     return;
-  //   }
-  //   log('no video for now, display the next one', { nextVideo, ct: (date - nextVideo.startedAt) / 1000 });
-
-  //   const $videos = $(`.js-video-test[data-video-id="${nextVideo._id}"]`);
-  //   if (!$videos.length) return;
-  //   $videos[0].playbackRate = playbackRate;
-  //   $videos[0].currentTime = 0;
-  //   if (Session.get('play')) Meteor.setTimeout(() => { $videos[0].play(); }, nextVideo.startedAt - date);
-  //   $videos.show();
-
-  //   return;
-  // }
 };
 
 Template.dbVideo.onCreated(function() {
@@ -106,30 +89,5 @@ Template.dbVideo.events({
     if (!sequence) return;
 
     dbVideoNext(this.position);
-return;
-
-    const nextVideoIndex = sequence[`${this.position}VideoIds`].indexOf(this._id) + 1;
-    if (nextVideoIndex >= sequence[`${this.position}VideoIds`].length) return;
-    const nextVideoId = sequence[`${this.position}VideoIds`][nextVideoIndex];
-
-    // const nextVideo = Clips.findOne(nextVideoId);
-    // if (!nextVideo) return;
-
-    // const currentTime = Session.get('currentTime');
-    // const currentDate = moment(sequence.startedAt).add(currentTime, 'seconds').toDate();
-
-    const $videos = $(`.js-video-test[data-video-id="${this._id}"]`);
-    $videos.hide();
-
-    const $nextVideos = $(`.js-video-test[data-video-id="${nextVideoId}"]`);
-    if (!$nextVideos.length) return;
-    $nextVideos[0].playbackRate = playbackRate;
-
-// XXX faire que ca deporte le play a plus tard si la video est trop en avance
-
-    $nextVideos[0].currentTime = (currentDate - nextVideo.startedAt) / 1000;
-    if (Session.get('play')) Meteor.setTimeout(() => { $videos[0].play(); }, nextVideo.startedAt - date);
-    $nextVideos[0].play();
-    $nextVideos.show();
   },
 });

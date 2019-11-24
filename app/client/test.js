@@ -79,5 +79,5 @@ Tracker.autorun(() => {
 Template.test.helpers({
   sequence() { return Sequences.findOne(); },
   video() { return Clips.findOne(`${this}`); },
-  url(name) { return name ? URL.createObjectURL(files[name]) : '' },
+  url(name) { return name ? URL.createObjectURL(localFiles[name]) : '' },
 });
