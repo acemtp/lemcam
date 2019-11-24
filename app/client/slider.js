@@ -1,8 +1,8 @@
 Template.slider.onRendered(function () {
     const cellSize = 10;
-    const positionToY = { front: 0 * cellSize, left: 1 * cellSize, right:2 * cellSize, back: 3 * cellSize }
+    const positionToY = { front: 0 * cellSize, left: 1 * cellSize, right:2 * cellSize, back: 3 * cellSize };
 
-    const svg = d3.select('.js-slider')
+    const svg = d3.select('.js-slider');
 
     svg
       .on('mouseleave', function() {
@@ -17,7 +17,7 @@ Template.slider.onRendered(function () {
         const bcr = $('.js-slider')[0].getBoundingClientRect();
         const offset = Math.max(0, d3.event.pageX - bcr.x) / bcr.width * 700;
         const date = moment(sequence.startedAt).add(offset, 'seconds');
-        $('.line-mouse').attr('x1', offset).attr('x2', offset)
+        $('.line-mouse').attr('x1', offset).attr('x2', offset);
 
         $('.js-mouse-date').html(date.format('YY-MM-DD HH:mm:ss'));
         $('.js-mouse-offset').html(humanizeDuration(offset));
@@ -34,6 +34,22 @@ Template.slider.onRendered(function () {
         const date = moment(sequence.startedAt).add(offset, 'seconds').toDate();
         videoSetOffset(offset);
       })
+
+  let drag = d3.drag()
+    .on('start', function () { d3.select(this).raise().classed('active', true); })
+    .on('drag', function () { $('.line-start').attr('x1', d3.event.x).attr('x2', d3.event.x) })
+    .on('end', function () { d3.select(this).classed('active', false); });
+
+  svg.selectAll('.line-start')
+    .call(drag);
+
+  let drag2 = d3.drag()
+    .on('start', function () { d3.select(this).raise().classed('active', true); })
+    .on('drag', function () { $('.line-end').attr('x1', d3.event.x).attr('x2', d3.event.x) })
+    .on('end', function () { d3.select(this).classed('active', false); });
+
+  svg.selectAll('.line-end')
+    .call(drag2);
 
   this.autorun(() => {
     log('slider autorun render react');

@@ -26,13 +26,6 @@ videoSetOffset = offset => {
 
   const date = moment(sequence.startedAt).add(offset, 'seconds').toDate();
 
-  // const $videosAll = $(`.js-video-test`);
-  // _.each($videosAll, video => video.pause());
-  // _.each($videosAll, video => video.playbackRate = playbackRate);
-  // _.each($videosAll, video => video.currentTime = 0);
-
-  // dbVideoSet(date, 'front');
-
   _.each(['front', 'left', 'right', 'back'], position => {
     dbVideoSet(date, position);
   });

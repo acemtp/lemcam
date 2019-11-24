@@ -14,14 +14,28 @@
   fill: #4C566A;
 }
 
+.js-slider line {
+  stroke-width: 1;
+}
+
 .js-slider .line-mouse {
   stroke: tomato;
-  stroke-width: 1px;
 }
 
 .js-slider .line-current {
   stroke: white;
-  stroke-width: 1;
+}
+
+.js-slider .line-start {
+  stroke: blue;
+  stroke-width: 2;
+  cursor: w-resize;
+}
+
+.js-slider .line-end {
+  stroke: green;
+  stroke-width: 2;
+  cursor: e-resize;
 }
 
 svg text{
