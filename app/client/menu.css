@@ -1,0 +1,63 @@
+.menu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 200px;
+  height: 100vh;
+  overflow: hidden;
+  background-color: #2E3440;
+}
+
+.menu .label {
+  margin: 20px 0 0 10px;
+  border-radius: 4px;
+}
+
+.menu .item {
+  margin: 0 10px 0 10px;
+  border-radius: 4px;
+  padding: 5px;
+  cursor: pointer;
+}
+
+.menu .item:hover {
+  text-decoration: none;
+  color: #ECEFF4;
+  background-color: #3B4252;
+}
+
+.menu .item.active {
+  background-color: #88C0D0;
+  color: #2E3440
+}
+
+/* upload wrapper */
+
+.upload-btn-wrapper {
+  position: relative;
+  left: 10px;
+  top: 10px;
+  overflow: hidden;
+  display: inline-block;
+}
+
+.upload-btn-wrapper input[type=file] {
+  cursor: pointer;
+  font-size: 30px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: 0;
+}
+
+.upload-btn-wrapper a {
+  text-align: center;
+  width: 180px;
+  padding: 10px 5px;
+  font-size: 12px;
+}
+
+.upload-btn-wrapper:hover a {
+  background-color: #ECEFF4;
+  color: #3B4252;
+}

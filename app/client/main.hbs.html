@@ -8,15 +8,17 @@
 </head>
 
 <body>
-  {{> viewer}}
+  {{> dropzone}}
+  {{> menu}}
 
+  <div class="main">
+    <div class="welcome {{#if neq (Session 'page') 'welcome'}}d-none{{/if}}">{{> welcome}}</div>
+    <div class="viewer {{#if neq (Session 'page') 'viewer'}}d-none{{/if}}">{{> viewer}}</div>
+  </div>
   <!-- <script src='https://vjs.zencdn.net/7.6.5/video.js'></script> -->
 </body>
 
 <template name="viewer">
-  {{> dropzone}}
-
-  <input class="js-select" type="file" accept="video/*" multiple="true" webkitdirectory="true">
   <a class="btn js-fast-backward" href="#"><i class="fal fa-fast-backward"></i></a>
   <a class="btn js-backward" href="#"><i class="fal fa-backward"></i></a>
   <a class="btn js-play-toggle" href="#">{{#if Session "play"}}<i class="fal fa-pause"></i>{{else}}<i class="fal fa-play"></i>{{/if}}</a>
@@ -27,8 +29,6 @@
   <a class="btn js-play-speed" data-speed="2" href="#">2x</a>
   <a class="btn js-play-speed" data-speed="6" href="#">6x</a>
   <a class="btn js-play-speed" data-speed="10" href="#">10x</a>
-
-  <br>
 
   {{> slider}}
   {{> test}}

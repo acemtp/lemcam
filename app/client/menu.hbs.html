@@ -1,0 +1,13 @@
+<template name="menu">
+  <div class="menu">
+    <div class="upload-btn-wrapper">
+      <a class="btn" href="#"><i class="fal fa-fw fa-upload"></i> Select TeslaCam directory</a>
+      <input class="js-select" type="file" accept="video/*" multiple="true" webkitdirectory="true">
+    </div>
+
+    <div class="label"><b>Local Sequences</b></div>
+    {{#each sequences}}
+      <div class="item js-sequence-select {{#if eq (Session 'selectedSequenceId') _id}}active{{/if}}">{{fromNow startedAt}} ({{duration}}s)</div>
+    {{/each}}
+  </div>
+</template>

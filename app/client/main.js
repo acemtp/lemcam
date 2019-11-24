@@ -1,4 +1,4 @@
-Session.setDefault('selectedMinuteId', undefined);
+Session.setDefault('page', 'welcome');
 Session.set('play', false);
 
 playbackRate = 1;

@@ -1,0 +1,28 @@
+.welcome {
+  padding: 50px;
+}
+
+.welcome svg {
+  width: 200px;
+  height: 200px;
+  display: block;
+  margin: auto;
+}
+
+.welcome .logo {
+  display: block;
+  margin: auto;
+  text-align: center;
+  font-family: 'tesla';
+  font-size: 30px;
+}
+
+.welcome .text {
+  text-align: center;
+  padding: 20px 20%;
+  font-size: 14px;
+}
+
+.welcome code {
+  font-size: 100%;
+}
