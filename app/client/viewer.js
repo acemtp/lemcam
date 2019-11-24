@@ -10,8 +10,8 @@ const updateOffset = offset => {
 
   const date = moment(sequence.startedAt).add(offset, 'seconds');
 
-  $('.js-video-date').html(date.format('MM-DD-YYYY HH:mm:ss'));
-  $('.js-video-offset').html(Number(offset).toFixed(2));
+  $('.js-video-date').html(date.format('YY-MM-DD HH:mm:ss'));
+  $('.js-video-offset').html(humanizeDuration(offset));
   
   $('.line-current').attr('x1', offset).attr('x2', offset)
 
@@ -51,7 +51,8 @@ Meteor.startup(() => {
   Tracker.autorun(() => {
     const selectedSequenceId = Session.get('selectedSequenceId');
     l({selectedSequenceId});
-    extractMetaData(Session.get('selectedSequenceId'));
+    extractMetaData(selectedSequenceId);
+    videoSetOffset(currentOffset);
   });
 
   Tracker.autorun(() => {

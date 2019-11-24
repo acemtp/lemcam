@@ -10,6 +10,7 @@ hotkeys('down', event => {
   if (!olderSequence) return;
 
   Session.set('selectedSequenceId', olderSequence._id);
+  videoSetOffset(0);
 });
 
 hotkeys('up', event => {
@@ -22,6 +23,7 @@ hotkeys('up', event => {
   if (!newerSequence) return;
 
   Session.set('selectedSequenceId', newerSequence._id);
+  videoSetOffset(0);
 });
 
 hotkeys('right', event => { event.preventDefault(); $('.js-forward').click(); });

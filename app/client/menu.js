@@ -12,14 +12,5 @@ Template.menu.events({
 
 Template.menu.helpers({
   sequences() { return Sequences.find({}, { sort: { startedAt: -1 } }); },
-  humanizeDuration(duration) {
-    let str = ''; 
-    if (duration >= 60) {
-      const mn = duration / 60 | 0;
-      str += `${mn}min`;
-      duration -= mn * 60;
-    }
-    str += `${duration}s`;
-    return str;
-  }
+  humanizeDuration(duration) { return humanizeDuration(duration); },
 });

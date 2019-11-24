@@ -12,7 +12,9 @@ extractMetaData = async sequenceId => {
   const sequence = Sequences.findOne(sequenceId);
   if (!sequence) return;
 
-  const clipIds = _.flatten(sequence.frontClipIds, sequence.leftClipIds, sequence.rightClipIds, sequence.backClipIds);
+  const clipIds = _.compact(_.union(sequence.frontClipIds, sequence.leftClipIds, sequence.rightClipIds, sequence.backClipIds));
+
+  log(clipIds)
 
   const clips = Clips.find({ _id: { $in: clipIds } }, { sort: { startedAt: 1 } }).fetch();
 

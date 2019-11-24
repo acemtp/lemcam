@@ -19,8 +19,8 @@ Template.slider.onRendered(function () {
         const date = moment(sequence.startedAt).add(offset, 'seconds');
         $('.line-mouse').attr('x1', offset).attr('x2', offset)
 
-        $('.js-mouse-date').html(date.format('MM-DD-YYYY HH:mm:ss'));
-        $('.js-mouse-offset').html(Number(offset).toFixed(2));
+        $('.js-mouse-date').html(date.format('YY-MM-DD HH:mm:ss'));
+        $('.js-mouse-offset').html(humanizeDuration(offset));
 
         if (d3.event.buttons) {
           videoSetOffset(offset);

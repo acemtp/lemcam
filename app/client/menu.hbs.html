@@ -9,7 +9,7 @@
     {{#each sequences}}
       <div class="item js-sequence-select {{#if eq (Session 'selectedSequenceId') _id}}active{{/if}}">
         {{#if fuzzy}}~{{/if}}
-        {{formatDate startedAt "YY-MM-DD HH:mm"}}
+        {{formatDate startedAt "YY-MM-DD HH:mm:ss"}}
         ({{humanizeDuration duration}})
       </div>
     {{/each}}
