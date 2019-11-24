@@ -13,6 +13,8 @@
 </body>
 
 <template name="viewer">
+  {{> dropzone}}
+
   <input class="js-select" type="file" accept="video/*" multiple="true" webkitdirectory="true">
   <a class="btn js-play-toggle" href="#">{{#if Session "play"}}Pause{{else}}Play{{/if}}</a>
   <a class="btn js-play-speed" data-speed="0.5" href="#">0.5x</a>
