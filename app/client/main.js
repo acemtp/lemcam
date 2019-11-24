@@ -82,43 +82,43 @@ prepareLocalFiles = async files => {
     Clips.update(clip._id, { $set: { sequenceId } });
   });
 
-  const sequence = Sequences.findOne();
-  const uploadInProgressCount = sequence.backClipIds ? 4 : 3;
+  // const sequence = Sequences.findOne();
+  // const uploadInProgressCount = sequence.backClipIds ? 4 : 3;
 
-  videoId = Videos.id();
-  const video = Videos.insert({
-    _id: videoId,
-    startedAt: sequence.startedAt,
-    endedAt: sequence.endedAt,
-    duration: sequence.duration,
-    frontClip: Clips.findOne(sequence.frontClipIds[0]),
-    leftClip: Clips.findOne(sequence.leftClipIds[0]),
-    rightClip: Clips.findOne(sequence.leftClipIds[0]),
-    backClip: sequence.backClipIds ? Clips.findOne(sequence.backClipIds[0]) : undefined,
-    uploadInProgressCount,
-  });
+  // videoId = Videos.id();
+  // const video = Videos.insert({
+  //   _id: videoId,
+  //   startedAt: sequence.startedAt,
+  //   endedAt: sequence.endedAt,
+  //   duration: sequence.duration,
+  //   frontClip: Clips.findOne(sequence.frontClipIds[0]),
+  //   leftClip: Clips.findOne(sequence.leftClipIds[0]),
+  //   rightClip: Clips.findOne(sequence.leftClipIds[0]),
+  //   backClip: sequence.backClipIds ? Clips.findOne(sequence.backClipIds[0]) : undefined,
+  //   uploadInProgressCount,
+  // });
 
-  uploadClip = (videoId, clipId) => {
-    const video = Videos.findOne(videoId);
-    const clip = Clips.findOne(clipId);
-    const upload = Files.insert({ file: localFiles[clip.name], fileId: `${video[`${clip.position}Clip`]._id}`, streams: 'dynamic', chunkSize: 'dynamic' }, false);
-    upload.on('start', function () { log('file upload start', clipId); });
-    upload.on('end', (error, fileObj) => {
-      Videos.update(videoId, { $inc: { uploadInProgressCount: -1 } });
-      const video = Videos.findOne(videoId);
-      log('file upload end', { clipId, video });
-      if (video.uploadInProgressCount === 0) {
-        log('file all upload end');
-        Meteor.call('videoCreate', videoId);
-      }
-    });
-    upload.start();
-  };
+  // uploadClip = (videoId, clipId) => {
+  //   const video = Videos.findOne(videoId);
+  //   const clip = Clips.findOne(clipId);
+  //   const upload = Files.insert({ file: localFiles[clip.name], fileId: `${video[`${clip.position}Clip`]._id}`, streams: 'dynamic', chunkSize: 'dynamic' }, false);
+  //   upload.on('start', function () { log('file upload start', clipId); });
+  //   upload.on('end', (error, fileObj) => {
+  //     Videos.update(videoId, { $inc: { uploadInProgressCount: -1 } });
+  //     const video = Videos.findOne(videoId);
+  //     log('file upload end', { clipId, video });
+  //     if (video.uploadInProgressCount === 0) {
+  //       log('file all upload end');
+  //       Meteor.call('videoCreate', videoId);
+  //     }
+  //   });
+  //   upload.start();
+  // };
 
-  uploadClip(videoId, sequence.frontClipIds[0]);
-  uploadClip(videoId, sequence.leftClipIds[0]);
-  uploadClip(videoId, sequence.rightClipIds[0]);
-  if (sequence.backClipIds) uploadClip(videoId, sequence.backClipIds[0]);
+  // uploadClip(videoId, sequence.frontClipIds[0]);
+  // uploadClip(videoId, sequence.leftClipIds[0]);
+  // uploadClip(videoId, sequence.rightClipIds[0]);
+  // if (sequence.backClipIds) uploadClip(videoId, sequence.backClipIds[0]);
 
   Meteor.setTimeout(() => {
     videoSetOffset(0);
@@ -130,6 +130,10 @@ prepareLocalFiles = async files => {
 };
 
 Template.viewer.events({
+  'click .js-forward'() { videoSetOffset(currentOffset + 1); },
+  'click .js-backward'() { videoSetOffset(Math.max(0, currentOffset - 1)); },
+  'click .js-fast-forward'() { videoSetOffset(currentOffset + 60); },
+  'click .js-fast-backward'() { videoSetOffset(Math.max(0, currentOffset - 60)); },
   'click .js-play-toggle'() { Session.set('play', !Session.get('play')); return false; },
   'click .js-play-speed'(e) {
     playbackRate = +e.target.dataset.speed;

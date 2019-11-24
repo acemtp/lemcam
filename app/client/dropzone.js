@@ -1,4 +1,4 @@
-function scanFiles(files, entry) {
+const scanFiles = (files, entry) => {
   let reader = entry.createReader();
   // Resolved when the entire directory is traversed
   return new Promise(resolveDirectory => {
@@ -28,7 +28,7 @@ function scanFiles(files, entry) {
       });
     })();
   });
-}
+};
 
 Template.dropzone.onRendered(() => {
   window.addEventListener('dragenter', e => { $('#dropzone').show(); });

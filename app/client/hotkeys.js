@@ -30,8 +30,8 @@ hotkeys('down', event => {
   // endCount = 0;
 });
 
-hotkeys('right', event => { event.preventDefault(); videoSetOffset(currentOffset + 1); });
-hotkeys('left', event => { event.preventDefault(); videoSetOffset(Math.max(0, currentOffset - 1)); });
+hotkeys('right', event => { event.preventDefault(); $('.js-forward').click(); });
+hotkeys('left', event => { event.preventDefault(); $('.js-backward').click(); });
 
 hotkeys('space', event => { event.preventDefault(); $('.js-play-toggle').click(); });
 

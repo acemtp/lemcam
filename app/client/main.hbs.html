@@ -4,6 +4,7 @@
   <script src="https://d3js.org/d3.v5.min.js"></script>
 
   <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.1/css/all.css" integrity="sha384-y++enYq9sdV7msNmXr08kJdkX4zEI1gMjjkw0l9ttOepH7fMdhb7CePwuRQCfwCr" crossorigin="anonymous">
 </head>
 
 <body>
@@ -16,7 +17,11 @@
   {{> dropzone}}
 
   <input class="js-select" type="file" accept="video/*" multiple="true" webkitdirectory="true">
-  <a class="btn js-play-toggle" href="#">{{#if Session "play"}}Pause{{else}}Play{{/if}}</a>
+  <a class="btn js-fast-backward" href="#"><i class="fal fa-fast-backward"></i></a>
+  <a class="btn js-backward" href="#"><i class="fal fa-backward"></i></a>
+  <a class="btn js-play-toggle" href="#">{{#if Session "play"}}<i class="fal fa-pause"></i>{{else}}<i class="fal fa-play"></i>{{/if}}</a>
+  <a class="btn js-forward" href="#"><i class="fal fa-forward"></i></a>
+  <a class="btn js-fast-forward" href="#"><i class="fal fa-fast-forward"></i></a>
   <a class="btn js-play-speed" data-speed="0.5" href="#">0.5x</a>
   <a class="btn js-play-speed active" data-speed="1" href="#">1x</a>
   <a class="btn js-play-speed" data-speed="2" href="#">2x</a>
