@@ -1,6 +1,6 @@
 <head>
-  <!-- <link href="https://vjs.zencdn.net/7.6.5/video-js.css" rel="stylesheet"> -->
-  <!-- <script src="https://vjs.zencdn.net/ie8/1.1.2/videojs-ie8.min.js"></script> -->
+  <link href="https://vjs.zencdn.net/7.6.5/video-js.css" rel="stylesheet">
+  <script src="https://vjs.zencdn.net/ie8/1.1.2/videojs-ie8.min.js"></script>
   <script src="https://d3js.org/d3.v5.min.js"></script>
 
   <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
@@ -14,7 +14,7 @@
   <div class="main">
     <div class="welcome {{#if neq (Session 'page') 'welcome'}}d-none{{/if}}">{{> welcome}}</div>
     <div class="viewer {{#if neq (Session 'page') 'viewer'}}d-none{{/if}}">{{> viewer}}</div>
+    <div class="video {{#if neq (Session 'page') 'video'}}d-none{{/if}}">{{> video}}</div>
   </div>
-  <!-- <script src='https://vjs.zencdn.net/7.6.5/video.js'></script> -->
+  <script src='https://vjs.zencdn.net/7.6.5/video.js'></script>
 </body>
-

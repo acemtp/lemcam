@@ -13,5 +13,12 @@
         ({{humanizeDuration duration}})
       </div>
     {{/each}}
+    <div class="label"><b>Videos</b></div>
+    {{#each videos}}
+      <div class="item js-video-select {{#if eq (Session 'selectedVideoId') _id}}active{{/if}}">
+        {{formatDate startedAt "YY-MM-DD HH:mm:ss"}}
+        ({{humanizeDuration duration}})
+      </div>
+    {{/each}}
   </div>
 </template>

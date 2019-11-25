@@ -70,7 +70,7 @@ youtubeUpload = videoId => {
       status: { privacyStatus: 'unlisted' },
     },
     media: {
-      body: fs.createReadStream(`/tmp/lemcam/videos/${video._id}.mp4`), 
+      body: fs.createReadStream(`/tmp/lemcam/videos/${video._id}.mp4`),
     }
   }));
   log(res);
