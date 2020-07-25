@@ -5,15 +5,16 @@
     "start": "meteor run"
   },
   "devDependencies": {
-    "babel-eslint": "^10.0.3",
-    "eslint": "^6.6.0",
-    "eslint-config-airbnb-base": "^14.0.0",
-    "eslint-plugin-import": "^2.18.2"
+    "babel-eslint": "^10.1.0",
+    "eslint": "^7.5.0",
+    "eslint-config-airbnb-base": "^14.2.0",
+    "eslint-plugin-import": "^2.22.0"
   },
   "dependencies": {
-    "@babel/runtime": "^7.7.2",
-    "ffmpeg-progress-wrapper": "^1.1.5",
-    "googleapis": "^45.0.0",
-    "hotkeys-js": "^3.7.2"
+    "@babel/runtime": "^7.10.5",
+    "ffmpeg-progress-wrapper": "^1.1.7",
+    "googleapis": "^56.0.0",
+    "hotkeys-js": "^3.8.1",
+    "jquery": "^1.12.1"
   }
 }
