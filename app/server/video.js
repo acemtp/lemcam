@@ -37,7 +37,7 @@ Picker.route('/video/:videoId', (params, req, res) => {
         'Content-Length': chunkSize,
         'Content-Type': 'video/mp4'
       });
-      fs.createReadStream(path, { start, end }).pipe(res);
+      fs.createReadStream(file, { start, end }).pipe(res);
     });
   } catch (err) {
     error('video route failed', { err });
