@@ -26,3 +26,7 @@
 .welcome code {
   font-size: 100%;
 }
+
+.welcome a {
+  color: white;
+}

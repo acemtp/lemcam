@@ -13,7 +13,7 @@ const updateOffset = offset => {
   $('.js-video-date').html(date.format('YY-MM-DD HH:mm:ss'));
   $('.js-video-offset').html(humanizeDuration(offset));
   
-  $('.line-current').attr('x1', offset).attr('x2', offset)
+  $('.line-current').attr('x1', offset).attr('x2', offset);
 
   currentOffset = offset;
 };
@@ -45,6 +45,16 @@ Meteor.startup(() => {
     const selectedSequenceId = Session.get('selectedSequenceId');
     l({selectedSequenceId});
     extractMetaData(selectedSequenceId);
+
+    sequence = Sequences.findOne(selectedSequenceId);
+    if (!sequence) return;
+    const eventOffset = moment(sequence.eventAt).diff(sequence.startedAt, 'seconds');
+    l({eventOffset, sequence})
+    $('.line-event').attr('x1', eventOffset).attr('x2', eventOffset);
+    $('.line-start').attr('x1', eventOffset - 3).attr('x2', eventOffset - 3);
+    $('.line-end').attr('x1', eventOffset + 10).attr('x2', eventOffset + 10);
+
+    currentOffset = eventOffset;
     videoSetOffset(currentOffset);
   });
 

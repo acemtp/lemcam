@@ -58,8 +58,6 @@ prepareLocalFiles = async files => {
     if (!localFiles[file.name]) localFiles[file.name] = file;
   });
 
-  log('files insert');
-
   _.each(localFiles, file => {
     if (Clips.findOne({ name: file.name })) return;
 
@@ -73,7 +71,7 @@ prepareLocalFiles = async files => {
 
     clip.endedAt = moment(clip.startedAt).add(60, 'seconds').toDate();
 
-    clip.duration = 60;
+    clip.duration = 60; // default duration since it's fuzzy
 
     clip.fuzzy = true; // we don't have the exact timing extracted from the video
 
@@ -94,14 +92,29 @@ prepareLocalFiles = async files => {
       });
     } else {
       sequenceId = newestSequence._id;
-      const modifier = {};
-      if (clip.endedAt > newestSequence.endedAt) modifier.$set = { endedAt: clip.endedAt, duration: (clip.endedAt - newestSequence.startedAt) / 1000 };
-      Sequences.update(newestSequence._id, modifier);
+      if (clip.endedAt > newestSequence.endedAt) {
+        Sequences.update(newestSequence._id, { $set: { endedAt: clip.endedAt, duration: (clip.endedAt - newestSequence.startedAt) / 1000 } });
+      }
     }
     Clips.update(clip._id, { $set: { sequenceId } });
   });
 
-  Meteor.setTimeout(() => {
-    videoSetOffset(0);
-  }, 500);
+  _.each(files, file => {
+    if (file.name !== 'event.json') return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const json = JSON.parse(atob(e.target.result.substr(37)))
+      json.eventAt = new Date(json.timestamp);
+      delete json.timestamp;
+      json.est_lat = +json.est_lat;
+      json.est_lon = +json.est_lon;
+
+      const sequence = Sequences.findOne({ startedAt: { $lte: json.eventAt }, endedAt: { $gte: json.eventAt } });
+      if (!sequence) return;
+      Sequences.update(sequence._id, { $set: json });
+    };
+    reader.readAsDataURL(file);
+  });
+
+  Meteor.setTimeout(() => { videoSetOffset(0); }, 500);
 };

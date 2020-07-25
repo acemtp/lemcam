@@ -26,6 +26,10 @@
   stroke: white;
 }
 
+.js-slider .line-event {
+  stroke: red;
+}
+
 .js-slider .line-start {
   stroke: blue;
   stroke-width: 2;
