@@ -1,12 +1,11 @@
-Session.set('selectedSequenceId', this._id);
-
 Template.menu.events({
   async 'change .js-select'(e) {
-    prepareLocalFiles(e.target.files)
+    prepareLocalFiles(e.target.files);
   },
   'click .js-sequence-select'() {
     Session.set('page', 'viewer');
     Session.set('selectedSequenceId', this._id);
+    videoSetOffset(0);
   },
   'click .js-video-select'() {
     Session.set('page', 'video');

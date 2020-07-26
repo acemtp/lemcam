@@ -20,8 +20,18 @@ const updateOffset = offset => {
 // force the video to a specific position in the sequence
 // "offset" is between 0s and the duration of the sequence in seconds
 videoSetOffset = offset => {
-  sequence = Sequences.findOne(Session.get('selectedSequenceId'));
+  const sequence = Sequences.findOne(Session.get('selectedSequenceId'));
   if (!sequence) return;
+
+  if (offset === 0 && sequence.eventAt) {
+    const eventOffset = moment(sequence.eventAt).diff(sequence.startedAt, 'seconds');
+    l({ eventOffset, sequence });
+    $('.line-event').attr('x1', eventOffset).attr('x2', eventOffset);
+    $('.line-start').attr('x1', eventOffset - 3).attr('x2', eventOffset - 3);
+    $('.line-end').attr('x1', eventOffset + 10).attr('x2', eventOffset + 10);
+
+    offset = eventOffset - 2;
+  }
 
   const date = moment(sequence.startedAt).add(offset, 'seconds').toDate();
 
@@ -44,17 +54,6 @@ Meteor.startup(() => {
     const selectedSequenceId = Session.get('selectedSequenceId');
     l({ selectedSequenceId });
     extractMetaData(selectedSequenceId);
-
-    const sequence = Sequences.findOne(selectedSequenceId);
-    if (!sequence) return;
-    const eventOffset = moment(sequence.eventAt).diff(sequence.startedAt, 'seconds');
-    l({ eventOffset, sequence });
-    $('.line-event').attr('x1', eventOffset).attr('x2', eventOffset);
-    $('.line-start').attr('x1', eventOffset - 3).attr('x2', eventOffset - 3);
-    $('.line-end').attr('x1', eventOffset + 10).attr('x2', eventOffset + 10);
-
-    currentOffset = eventOffset - 2;
-    videoSetOffset(currentOffset);
   });
 
   Tracker.autorun(() => {

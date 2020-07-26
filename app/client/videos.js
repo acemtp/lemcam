@@ -1,5 +1,3 @@
-Session.set('selectedSequenceId', this._id);
-
 Template.videosMenu.events({
   'click .js-video-select'() {
     Session.set('page', 'video');
