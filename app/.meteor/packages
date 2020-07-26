@@ -29,3 +29,8 @@ momentjs:moment
 ostrio:files
 meteorhacks:picker
 jquery
+illusionfield:blaze-layout
+accounts-password
+accounts-ui
+accounts-base
+kadira:flow-router

@@ -1,0 +1,36 @@
+<template name="videosMenu">
+  <div class="menu">
+    <a href="/videos">
+      {{> logo}}
+      <div class="logo">LEMCAM</div>
+    </a>
+    <div class="label"><b>Videos</b></div>
+    {{#each videos}}
+      <a class="item js-video-select {{#if eq (Session 'selectedVideoId') _id}}active{{/if}}" href="/videos/{{_id}}">
+        {{formatDate startedAt "YY-MM-DD HH:mm:ss"}}
+        ({{humanizeDuration duration}})
+      </a>
+    {{/each}}
+  </div>
+</template>
+
+<template name="videos">
+  {{> videosMenu}}
+  <div class="main">
+    <div class="welcome">{{> welcome}}</div>
+  </div>
+</template>
+
+<template name="video">
+  {{> videosMenu}}
+  <div class="main">
+    video {{videoId}}
+    <video id="my-video" class="video-js vjs-fluid" controls preload="auto" width="1920" height="960" data-setup='{"fluid": true}'>
+      <source src="//vjs.zencdn.net/v/oceans.mp4" type="video/mp4">
+      <p class="vjs-no-js">
+        To view this video please enable JavaScript, and consider upgrading to a web browser that
+        <a href="https://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
+      </p>
+    </video>
+  </div>
+</template>

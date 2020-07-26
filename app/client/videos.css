@@ -1,0 +1,19 @@
+.menu a {
+  color: white;
+  text-decoration: none;
+}
+
+.menu svg {
+  width: 40px;
+  height: 40px;
+  display: block;
+  margin: auto;
+}
+
+.menu .logo {
+  display: block;
+  margin: auto;
+  text-align: center;
+  font-family: "tesla";
+  font-size: 20px;
+}

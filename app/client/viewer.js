@@ -1,4 +1,3 @@
-
 let playDate;
 let playOffset;
 
@@ -12,7 +11,7 @@ const updateOffset = offset => {
 
   $('.js-video-date').html(date.format('YY-MM-DD HH:mm:ss'));
   $('.js-video-offset').html(humanizeDuration(offset));
-  
+
   $('.line-current').attr('x1', offset).attr('x2', offset);
 
   currentOffset = offset;
@@ -43,18 +42,18 @@ let currentTimeHandler;
 Meteor.startup(() => {
   Tracker.autorun(() => {
     const selectedSequenceId = Session.get('selectedSequenceId');
-    l({selectedSequenceId});
+    l({ selectedSequenceId });
     extractMetaData(selectedSequenceId);
 
-    sequence = Sequences.findOne(selectedSequenceId);
+    const sequence = Sequences.findOne(selectedSequenceId);
     if (!sequence) return;
     const eventOffset = moment(sequence.eventAt).diff(sequence.startedAt, 'seconds');
-    l({eventOffset, sequence})
+    l({ eventOffset, sequence });
     $('.line-event').attr('x1', eventOffset).attr('x2', eventOffset);
     $('.line-start').attr('x1', eventOffset - 3).attr('x2', eventOffset - 3);
     $('.line-end').attr('x1', eventOffset + 10).attr('x2', eventOffset + 10);
 
-    currentOffset = eventOffset;
+    currentOffset = eventOffset - 2;
     videoSetOffset(currentOffset);
   });
 
@@ -115,7 +114,7 @@ Template.viewer.events({
     const endedX = $('.line-end').attr('x1');
     const endedAt = moment(sequence.startedAt).add(endedX, 'seconds').toDate();
 
-l({ ss: sequence.startedAt, startedX, startedAt, endedX, endedAt})
+    l({ ss: sequence.startedAt, startedX, startedAt, endedX, endedAt });
 
     const clips = Clips.find({ sequenceId: sequence._id, startedAt: { $lte: endedAt }, endedAt: { $gt: startedAt } }, { sort: { startedAt: 1 } }).fetch();
 
@@ -137,7 +136,7 @@ l({ ss: sequence.startedAt, startedX, startedAt, endedX, endedAt})
       const video = Videos.findOne(videoId);
       const clip = Clips.findOne(clipId);
       const upload = Files.insert({ file: localFiles[clip.name], fileId: clipId, streams: 'dynamic', chunkSize: 'dynamic' }, false);
-      upload.on('start', function () { log('file upload start', clipId); });
+      upload.on('start', () => { log('file upload start', clipId); });
       upload.on('end', (error, fileObj) => {
         Videos.update(videoId, { $inc: { uploadInProgressCount: -1 } });
         const video = Videos.findOne(videoId);
@@ -153,5 +152,5 @@ l({ ss: sequence.startedAt, startedX, startedAt, endedX, endedAt})
     _.each(clips, clip => { uploadClip(videoId, clip._id); });
 
     return false;
-  }
+  },
 });
