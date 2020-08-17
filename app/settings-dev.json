@@ -8,9 +8,6 @@
       "enableLogClient": false,
       "enableApm": false
     },
-    "analyticsSettings": {
-      "Google Analytics": { "trackingId": "UA-", "sendUserId": true }
-    },
     "maintenance": false
   }
 }

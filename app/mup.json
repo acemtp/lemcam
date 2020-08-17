@@ -1,0 +1,41 @@
+{
+  // Server authentication info
+  "servers": [
+    {
+      "host": "staging.lempire.co",
+      "sshOptions": {
+        "port": 2222
+      },
+      "username": "root"
+    }
+  ],
+  // Install MongoDB in the server, does not destroy local MongoDB on future setup
+  "setupMongo": false,
+  // WARNING: Node.js is required! Only skip if you already have Node.js installed on server.
+  "setupNode": false,
+  // WARNING: If nodeVersion omitted will setup 0.10.36 by default. Do not use v, only version number.
+  "nodeVersion": "12.16.1",
+  // Install PhantomJS in the server
+  "setupPhantom": false,
+  // Show a progress bar during the upload of the bundle to the server.
+  // Might cause an error in some rare cases if set to true, for instance in Shippable CI
+  "enableUploadProgressBar": true,
+  // Application name (No spaces)
+  "appName": "lemcam",
+  // Master Application name (No spaces)
+  "masterName": "lemcam",
+  // Location of app (local directory)
+  "app": ".",
+  // Configure environment
+  "env": {
+    "ROOT_URL": "https://lemcam.com",
+    "PORT": 3200
+    // "MONGO_OPLOG_URL": "mongodb://talkus_oplog:l9YZo5ckoOHmhqQjqYfFse@lamppost.16.mongolayer.com:10296,lamppost.17.mongolayer.com:10285/local?authSource=talkus-io&replicaSet=set-566696705612529517000298&socketTimeoutMS=60000",
+    // "MONGO_URL": "mongodb://talkus:l9YZo5ckoOHmhqQjqYfFse@lamppost.16.mongolayer.com:10296,lamppost.17.mongolayer.com:10285/talkus-io?replicaSet=set-566696705612529517000298&socketTimeoutMS=60000"
+    // "MONGO_URL": "mongodb://localhost:27017/lemdesk",
+    // "MONGO_OPLOG_URL": "mongodb://oplogger:PasswordForOplogger@localhost:27017/local?authSource=admin&replicaSet=rs0"
+  },
+  // Meteor Up checks if the app comes online just after the deployment
+  // before mup checks that, it will wait for no. of seconds configured below
+  "deployCheckWaitTime": 10
+}

@@ -8,7 +8,7 @@ Tracker.autorun(() => {
 
 FlowRouter.route('/', {
   name: 'home',
-  action: () => { FlowRouter.go('videos'); },
+  action: () => { FlowRouter.go('viewer'); },
 });
 
 route('viewer');

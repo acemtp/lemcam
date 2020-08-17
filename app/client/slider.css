@@ -1,7 +1,7 @@
 .js-slider {
   width: 100%;
   height: 20px;
-  background-color: #434C5E;
+  background-color: #434c5e;
   cursor: pointer;
 }
 
@@ -11,7 +11,7 @@
 }
 
 .js-slider rect {
-  fill: #4C566A;
+  fill: #4c566a;
 }
 
 .js-slider line {
@@ -31,18 +31,20 @@
 }
 
 .js-slider .line-start {
-  stroke: blue;
+  /* stroke: blue; */
+  stroke: transparent;
   stroke-width: 2;
   cursor: w-resize;
 }
 
 .js-slider .line-end {
-  stroke: green;
+  /* stroke: green; */
+  stroke: transparent;
   stroke-width: 2;
   cursor: e-resize;
 }
 
-svg text{
+svg text {
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;

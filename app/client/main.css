@@ -1,17 +1,19 @@
 /* https://www.nordtheme.com/ */
 
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
 
 body {
-  font-family: 'Roboto', sans-serif;
+  font-family: "Roboto", sans-serif;
   font-size: 80%;
-  background-color: #3B4252;
-  color: #ECEFF4;
+  background-color: #3b4252;
+  color: #eceff4;
 }
 
 @font-face {
-  font-family: 'tesla';
-  src: url('/fonts/tesla.ttf') format('truetype');
+  font-family: "tesla";
+  src: url("/fonts/tesla.ttf") format("truetype");
 }
 
 .d-none {
@@ -48,7 +50,7 @@ body {
   align-items: center;
   cursor: pointer;
   background-color: transparent;
-  border: 1px solid #3B4252;
+  border: 1px solid #3b4252;
   padding: 10px;
   margin: 3px 0;
   box-shadow: rgba(15, 17, 21, 0.2) 0px 3px 6px 0px;
@@ -56,7 +58,7 @@ body {
   transition: box-shadow 400ms ease-in-out 0s, background-color 400ms ease-in-out 0s;
 }
 .sequence:hover {
-  background-color: #3B4252;
+  background-color: #3b4252;
 }
 
 .sequence .header {
@@ -90,31 +92,31 @@ body {
   height: 12px;
   margin: 1px;
   color: transparent;
-  background-color: #4C566A;
+  background-color: #4c566a;
   border-radius: 1px;
   transition: all 200ms ease-in-out 0s;
   overflow: hidden;
 }
 
 .minute:hover {
-  color: #ECEFF4;
-  background-color: #434C5E;
+  color: #eceff4;
+  background-color: #434c5e;
   width: 60px;
 }
 
 .minute.active {
-  color: #2E3440;
-  background-color: #D8DEE9;
+  color: #2e3440;
+  background-color: #d8dee9;
   width: 60px;
 }
 
 .minute.active:hover {
-  background-color: #E5E9F0;
+  background-color: #e5e9f0;
 }
 
 .btn {
-  background-color: #D8DEE9;
-  color: #2E3440;
+  background-color: #d8dee9;
+  color: #2e3440 !important;
   padding: 5px 10px;
   border-radius: 4px;
   text-decoration: none;
@@ -124,16 +126,16 @@ body {
 }
 
 .btn:hover {
-  background-color: #ECEFF4;
-  color: #3B4252;
+  background-color: #eceff4;
+  color: #3b4252;
 }
 
 .btn.active {
-  background-color: #8FBCBB;
+  background-color: #8fbcbb;
 }
 
 .btn.active:hover {
-  background-color: #88C0D0;
+  background-color: #88c0d0;
 }
 
 /* test */
